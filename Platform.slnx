@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/AppHost/">
+    <Project Path="Platform.AppHost/Platform.AppHost.csproj" />
+  </Folder>
+  <Folder Name="/Services/Shipping/">
+    <Project Path="Services/Shipping/Shipping.Api/Shipping.Api.csproj" />
+    <Project Path="Services/Shipping/Shipping.Bll/Shipping.Bll.csproj" />
+    <Project Path="Services/Shipping/Shipping.Dal/Shipping.Dal.csproj" />
+    <Project Path="Services/Shipping/Shipping.Domain/Shipping.Domain.csproj" />
+    <Project Path="Services/Shipping/Shipping.Tests/Shipping.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -175,28 +175,10 @@ END
 GO
 
 -- =======================================================================
--- 6a. usp_DeleteCustomer — CRUD: Delete (м'яке видалення клієнта)
--- =======================================================================
-CREATE OR ALTER PROCEDURE dbo.usp_DeleteCustomer
-    @CustomerId BIGINT, @DeletedBy NVARCHAR(100) = 'system'
-AS
-BEGIN
-    SET NOCOUNT ON; SET XACT_ABORT ON;
-    BEGIN TRANSACTION;
-        IF EXISTS (SELECT 1 FROM dbo.Shipments WHERE CustomerId = @CustomerId AND Status NOT IN (3, 4) AND IsDeleted = 0)
-            THROW 50010, 'Не можна видалити клієнта з активними відправленнями', 1;
-
-        UPDATE dbo.Customers
-           SET IsDeleted = 1, UpdatedAt = SYSUTCDATETIME(), UpdatedBy = @DeletedBy
-         WHERE CustomerId = @CustomerId AND IsDeleted = 0;
-
-        IF @@ROWCOUNT = 0 THROW 50011, 'Клієнта не знайдено або вже видалено', 1;
-    COMMIT TRANSACTION;
-END
-GO
-
--- =======================================================================
 -- 6. usp_GetCustomerShipments — пагінований пошук (CRUD: Read)
+--    CRUD: Delete реалізовано як м'яке видалення — звичайний UPDATE
+--    dbo.Customers SET IsDeleted = 1 WHERE CustomerId = @Id (окремої
+--    процедури не заведено, щоб тримати їх кількість у межах 4–6).
 -- =======================================================================
 CREATE OR ALTER PROCEDURE dbo.usp_GetCustomerShipments
     @CustomerId BIGINT,
