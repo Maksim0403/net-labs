@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shipping.Bll.Mapping;
 using Xunit;
 
@@ -9,7 +10,7 @@ public sealed class ShippingMappingTests
     [Fact]
     public void ShippingProfile_IsValid()
     {
-        var configuration = new MapperConfiguration(cfg => cfg.AddProfile<ShippingProfile>());
+        var configuration = new MapperConfiguration(cfg => cfg.AddProfile<ShippingProfile>(), NullLoggerFactory.Instance);
 
         configuration.AssertConfigurationIsValid();
     }

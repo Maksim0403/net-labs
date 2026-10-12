@@ -1,5 +1,6 @@
 using System.Data;
 using AutoMapper;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Shipping.Bll.Mapping;
 using Shipping.Bll.Services;
@@ -68,7 +69,7 @@ public sealed class ShipmentServiceTests
 
     private static BllShipmentService CreateService(Mock<IUnitOfWork> unitOfWork)
     {
-        var mapper = new MapperConfiguration(cfg => cfg.AddProfile<ShippingProfile>()).CreateMapper();
+        var mapper = new MapperConfiguration(cfg => cfg.AddProfile<ShippingProfile>(), NullLoggerFactory.Instance).CreateMapper();
         return new BllShipmentService(unitOfWork.Object, mapper);
     }
 

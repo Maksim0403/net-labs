@@ -130,9 +130,23 @@ Services/Shipping/
 5. Візьми фактичний HTTPS endpoint ресурсу `shipping-api` з Dashboard і відкрий його з `/swagger`. Порт API призначається Aspire динамічно.
 6. У поточній конфігурації SQL Server Express є локальною залежністю: Aspire передає connection string через `WithReference`, але не створює локальний SQL Server.
 
+`Platform.DatabaseInitializer` є одноразовим startup-компонентом контейнерного
+режиму. Його повторний запуск безпечний для вже підготовленої бази завдяки
+`CREATE OR ALTER` процедур і idempotent seed.
+
 Для перевірки автоматичних тестів:
 
 ```bash
+dotnet test Services/Shipping/Shipping.Tests/Shipping.Tests.csproj
+```
+
+Інтеграційний тест використовує реальний SQL Server лише коли задано
+`SHIPPING_TEST_CONNECTION_STRING`. Рядок має вказувати на окрему тестову базу,
+назва якої містить `test`; тест створює схему, процедури й seed, а після виконання
+видаляє цю базу. Не вказуй робочу базу:
+
+```powershell
+$env:SHIPPING_TEST_CONNECTION_STRING = "Server=.\SQLEXPRESS;Database=ShippingLab02Test;Trusted_Connection=True;TrustServerCertificate=True"
 dotnet test Services/Shipping/Shipping.Tests/Shipping.Tests.csproj
 ```
 

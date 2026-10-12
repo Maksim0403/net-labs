@@ -12,6 +12,10 @@
 	<PackageReference Include="xunit" Version="2.9.3" />
 	<PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
 	<PackageReference Include="Moq" Version="4.20.72" />
+	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+	<None Include="..\..\..\db\p1\schema.sql" Link="schema.sql" CopyToOutputDirectory="PreserveNewest" />
+	<None Include="..\..\..\db\p1\procedures.sql" Link="procedures.sql" CopyToOutputDirectory="PreserveNewest" />
+	<None Include="..\..\..\db\p1\seed.sql" Link="seed.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

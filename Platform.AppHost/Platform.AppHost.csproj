@@ -17,5 +17,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Services\Shipping\Shipping.Api\Shipping.Api.csproj" />
+		<ProjectReference Include="..\Platform.DatabaseInitializer\Platform.DatabaseInitializer.csproj" />
 	</ItemGroup>
 </Project>

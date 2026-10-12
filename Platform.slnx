@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/AppHost/">
     <Project Path="Platform.AppHost/Platform.AppHost.csproj" />
+    <Project Path="Platform.DatabaseInitializer/Platform.DatabaseInitializer.csproj" />
   </Folder>
   <Folder Name="/Services/Shipping/">
     <Project Path="Services/Shipping/Shipping.Api/Shipping.Api.csproj" />
