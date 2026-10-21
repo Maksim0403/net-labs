@@ -27,7 +27,16 @@ CREATE OR ALTER PROCEDURE dbo.usp_CreateShipment
 AS
 BEGIN
     SET NOCOUNT ON; SET XACT_ABORT ON;
-    BEGIN TRANSACTION;
+    DECLARE @OwnTransaction bit = 0;
+    IF @@TRANCOUNT = 0
+    BEGIN
+        SET @OwnTransaction = 1;
+        BEGIN TRANSACTION;
+    END
+    ELSE
+        SAVE TRANSACTION CreateShipSP;
+
+    BEGIN TRY
 
         IF NOT EXISTS (SELECT 1 FROM dbo.Customers WHERE CustomerId = @CustomerId AND IsDeleted = 0)
             THROW 50001, 'Клієнта не знайдено', 1;
@@ -59,7 +68,15 @@ BEGIN
         INSERT dbo.ShipmentStatusHistory (ShipmentId, OldStatus, NewStatus, ChangedBy)
         VALUES (@ShipmentId, NULL, 0, @CreatedBy);
 
-    COMMIT TRANSACTION;
+        IF @OwnTransaction = 1 COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() = 1 AND @OwnTransaction = 0
+            ROLLBACK TRANSACTION CreateShipSP;
+        ELSE IF @OwnTransaction = 1 AND XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH;
 END
 GO
 
@@ -71,7 +88,16 @@ CREATE OR ALTER PROCEDURE dbo.usp_AddServiceToShipment
 AS
 BEGIN
     SET NOCOUNT ON; SET XACT_ABORT ON;
-    BEGIN TRANSACTION;
+    DECLARE @OwnTransaction bit = 0;
+    IF @@TRANCOUNT = 0
+    BEGIN
+        SET @OwnTransaction = 1;
+        BEGIN TRANSACTION;
+    END
+    ELSE
+        SAVE TRANSACTION AddServiceSP;
+
+    BEGIN TRY
         IF NOT EXISTS (SELECT 1 FROM dbo.Shipments WITH (UPDLOCK) WHERE ShipmentId = @ShipmentId AND Status = 0)
             THROW 50004, 'Змінювати склад послуг можна лише для Draft-відправлення', 1;
 
@@ -89,7 +115,15 @@ BEGIN
            SET TotalPrice = (SELECT SUM(Quantity * UnitPrice) FROM dbo.ShipmentServices WHERE ShipmentId = @ShipmentId),
                UpdatedAt = SYSUTCDATETIME()
          WHERE ShipmentId = @ShipmentId;
-    COMMIT TRANSACTION;
+        IF @OwnTransaction = 1 COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() = 1 AND @OwnTransaction = 0
+            ROLLBACK TRANSACTION AddServiceSP;
+        ELSE IF @OwnTransaction = 1 AND XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH;
 END
 GO
 
@@ -101,7 +135,16 @@ CREATE OR ALTER PROCEDURE dbo.usp_ConfirmShipment
 AS
 BEGIN
     SET NOCOUNT ON; SET XACT_ABORT ON;
-    BEGIN TRANSACTION;
+    DECLARE @OwnTransaction bit = 0;
+    IF @@TRANCOUNT = 0
+    BEGIN
+        SET @OwnTransaction = 1;
+        BEGIN TRANSACTION;
+    END
+    ELSE
+        SAVE TRANSACTION ConfirmShipSP;
+
+    BEGIN TRY
         DECLARE @Status TINYINT;
         SELECT @Status = Status FROM dbo.Shipments WITH (UPDLOCK, HOLDLOCK)
          WHERE ShipmentId = @ShipmentId AND IsDeleted = 0;
@@ -116,7 +159,15 @@ BEGIN
 
         INSERT dbo.ShipmentStatusHistory (ShipmentId, OldStatus, NewStatus, ChangedBy)
         VALUES (@ShipmentId, 0, 1, @ConfirmedBy);
-    COMMIT TRANSACTION;
+        IF @OwnTransaction = 1 COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() = 1 AND @OwnTransaction = 0
+            ROLLBACK TRANSACTION ConfirmShipSP;
+        ELSE IF @OwnTransaction = 1 AND XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH;
 END
 GO
 
@@ -131,7 +182,16 @@ CREATE OR ALTER PROCEDURE dbo.usp_ChangeShipmentStatus
 AS
 BEGIN
     SET NOCOUNT ON; SET XACT_ABORT ON;
-    BEGIN TRANSACTION;
+    DECLARE @OwnTransaction bit = 0;
+    IF @@TRANCOUNT = 0
+    BEGIN
+        SET @OwnTransaction = 1;
+        BEGIN TRANSACTION;
+    END
+    ELSE
+        SAVE TRANSACTION ChangeStatusSP;
+
+    BEGIN TRY
         DECLARE @Old TINYINT;
         SELECT @Old = Status FROM dbo.Shipments WITH (UPDLOCK) WHERE ShipmentId = @ShipmentId;
 
@@ -146,7 +206,15 @@ BEGIN
 
         INSERT dbo.ShipmentStatusHistory (ShipmentId, OldStatus, NewStatus, ChangedBy)
         VALUES (@ShipmentId, @Old, @NewStatus, @ChangedBy);
-    COMMIT TRANSACTION;
+        IF @OwnTransaction = 1 COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() = 1 AND @OwnTransaction = 0
+            ROLLBACK TRANSACTION ChangeStatusSP;
+        ELSE IF @OwnTransaction = 1 AND XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH;
 END
 GO
 
@@ -158,7 +226,16 @@ CREATE OR ALTER PROCEDURE dbo.usp_CancelShipment
 AS
 BEGIN
     SET NOCOUNT ON; SET XACT_ABORT ON;
-    BEGIN TRANSACTION;
+    DECLARE @OwnTransaction bit = 0;
+    IF @@TRANCOUNT = 0
+    BEGIN
+        SET @OwnTransaction = 1;
+        BEGIN TRANSACTION;
+    END
+    ELSE
+        SAVE TRANSACTION CancelShipSP;
+
+    BEGIN TRY
         DECLARE @Old TINYINT;
         SELECT @Old = Status FROM dbo.Shipments WITH (UPDLOCK) WHERE ShipmentId = @ShipmentId;
 
@@ -170,33 +247,23 @@ BEGIN
 
         INSERT dbo.ShipmentStatusHistory (ShipmentId, OldStatus, NewStatus, ChangedBy)
         VALUES (@ShipmentId, @Old, 4, @ChangedBy);
-    COMMIT TRANSACTION;
-END
-GO
-
--- =======================================================================
--- 6a. usp_DeleteCustomer — CRUD: Delete (м'яке видалення клієнта)
--- =======================================================================
-CREATE OR ALTER PROCEDURE dbo.usp_DeleteCustomer
-    @CustomerId BIGINT, @DeletedBy NVARCHAR(100) = 'system'
-AS
-BEGIN
-    SET NOCOUNT ON; SET XACT_ABORT ON;
-    BEGIN TRANSACTION;
-        IF EXISTS (SELECT 1 FROM dbo.Shipments WHERE CustomerId = @CustomerId AND Status NOT IN (3, 4) AND IsDeleted = 0)
-            THROW 50010, 'Не можна видалити клієнта з активними відправленнями', 1;
-
-        UPDATE dbo.Customers
-           SET IsDeleted = 1, UpdatedAt = SYSUTCDATETIME(), UpdatedBy = @DeletedBy
-         WHERE CustomerId = @CustomerId AND IsDeleted = 0;
-
-        IF @@ROWCOUNT = 0 THROW 50011, 'Клієнта не знайдено або вже видалено', 1;
-    COMMIT TRANSACTION;
+        IF @OwnTransaction = 1 COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() = 1 AND @OwnTransaction = 0
+            ROLLBACK TRANSACTION CancelShipSP;
+        ELSE IF @OwnTransaction = 1 AND XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH;
 END
 GO
 
 -- =======================================================================
 -- 6. usp_GetCustomerShipments — пагінований пошук (CRUD: Read)
+--    CRUD: Delete реалізовано як м'яке видалення — звичайний UPDATE
+--    dbo.Customers SET IsDeleted = 1 WHERE CustomerId = @Id (окремої
+--    процедури не заведено, щоб тримати їх кількість у межах 4–6).
 -- =======================================================================
 CREATE OR ALTER PROCEDURE dbo.usp_GetCustomerShipments
     @CustomerId BIGINT,

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+	<OutputType>Exe</OutputType>
+	<TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+	<None Include="..\db\p1\schema.sql" Link="schema.sql" CopyToOutputDirectory="PreserveNewest" />
+	<None Include="..\db\p1\procedures.sql" Link="procedures.sql" CopyToOutputDirectory="PreserveNewest" />
+	<None Include="..\db\p1\seed.sql" Link="seed.sql" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
