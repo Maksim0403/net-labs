@@ -1,0 +1,65 @@
+2026-10-23 00:02:43.537 +03:00 [INF] HTTP GET /swagger/index.html responded 200 in 0.6814 ms
+2026-10-23 00:02:43.698 +03:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 33.7919 ms
+2026-10-23 00:02:49.382 +03:00 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+2026-10-23 00:02:49.435 +03:00 [INF] Executed DbCommand (34ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[CourierId], [t].[CreatedAt], [t].[CreatedBy], [t].[FullName], [t].[IsDeleted], [t].[Phone], [t].[RowVersion], [t].[UpdatedAt], [t].[UpdatedBy], [t].[WarehouseId], [t1].[CourierId], [t1].[ZoneId], [t1].[AssignedAt], [t1].[ZoneId0], [t1].[CreatedAt], [t1].[CreatedBy], [t1].[IsDeleted], [t1].[Name], [t1].[UpdatedAt], [t1].[UpdatedBy], [t1].[CourierId0]
+FROM (
+    SELECT TOP(@__p_0) [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+    FROM [Couriers] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [c].[FullName], [c].[CourierId]
+) AS [t]
+LEFT JOIN (
+    SELECT [c0].[CourierId], [c0].[ZoneId], [c0].[AssignedAt], [t2].[ZoneId] AS [ZoneId0], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[IsDeleted], [t2].[Name], [t2].[UpdatedAt], [t2].[UpdatedBy], [t0].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c0]
+    INNER JOIN (
+        SELECT [c1].[CourierId], [c1].[IsDeleted]
+        FROM [Couriers] AS [c1]
+        WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c0].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t2] ON [c0].[ZoneId] = [t2].[ZoneId]
+    WHERE [t0].[IsDeleted] = CAST(0 AS bit) AND [t2].[IsDeleted] = CAST(0 AS bit)
+) AS [t1] ON [t].[CourierId] = [t1].[CourierId]
+ORDER BY [t].[FullName], [t].[CourierId], [t1].[CourierId], [t1].[ZoneId], [t1].[CourierId0]
+2026-10-23 00:02:49.460 +03:00 [INF] HTTP GET /api/couriers responded 200 in 103.8536 ms
+2026-10-23 00:03:26.565 +03:00 [INF] Executed DbCommand (24ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-23 00:03:26.643 +03:00 [INF] Executed DbCommand (28ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-23 00:03:26.646 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-23 00:03:26.648 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-23 00:03:26.670 +03:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-10-23 00:03:26.893 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[Code] = N'CV-01'
+2026-10-23 00:03:26.957 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Vehicles] AS [v]
+        WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[PlateNumber] = N'AA1234BT') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-23 00:03:26.966 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Couriers] AS [c]
+        WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[Phone] = N'+380991112233') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-23 00:03:32.496 +03:00 [INF] HTTP GET /swagger/index.html responded 200 in 111.4614 ms
+2026-10-23 00:03:32.948 +03:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 135.0403 ms
