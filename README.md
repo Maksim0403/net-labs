@@ -301,13 +301,3 @@ curl -i -X POST http://localhost:5080/api/routes/1/complete
 curl -i -X PUT http://localhost:5080/api/vehicles/1/capacity -H "Content-Type: application/json" \
   -d '{"capacityKg":1200.0}'
 ```
-
-### Знімки екрана для здачі
-
-1. **Swagger UI** зі списком ендпоінтів `Fleet.Api`.
-2. **Відповідь з пагінацією**: `GET /api/couriers?page=2&pageSize=5` (видно `totalCount`, `items`, `hasNext`, `hasPrevious` та заголовки `X-Total-Count`).
-3. **Відповідь 400 з помилками валідації**: `POST /api/couriers` з порожнім `fullName` (`ValidationProblemDetails`).
-4. **Фрагмент логу з SQL-запитами**:
-   - `GET /api/couriers/1` (Eager Loading) — виконує 1 SQL-запит з `LEFT JOIN`.
-   - `GET /api/warehouses/1` (Explicit Loading) — виконує 2 окремі SQL-запити.
-```

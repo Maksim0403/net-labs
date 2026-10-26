@@ -3,10 +3,7 @@ using Shipping.Domain.Exceptions;
 
 namespace Shipping.Api.ErrorHandling;
 
-/// <summary>
-/// Централізована обробка помилок (Крок D): перетворює доменні винятки
-/// на HTTP-статуси й ProblemDetails. Жодних try/catch у контролерах.
-/// </summary>
+/// <summary>Централізована обробка помилок (ProblemDetails).</summary>
 public sealed class DomainExceptionHandler : IExceptionHandler
 {
     private readonly IProblemDetailsService _problemDetails;
@@ -53,3 +50,4 @@ public sealed class DomainExceptionHandler : IExceptionHandler
         });
     }
 }
+

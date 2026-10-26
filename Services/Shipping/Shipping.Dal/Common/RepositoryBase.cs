@@ -3,12 +3,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Shipping.Dal.Common;
 
-/// <summary>
-/// Базовий клас для репозиторію на чистому ADO.NET: спільне з'єднання і доступ
-/// до поточної транзакції Unit of Work (Крок B.2). Свідомо НЕ успадковує
-/// жодного Generic Repository — демонструє роботу з SqlConnection/SqlCommand
-/// без сторонніх бібліотек.
-/// </summary>
+/// <summary>Базовий клас для репозиторіїв на чистому ADO.NET.</summary>
 public abstract class RepositoryBase
 {
     protected readonly SqlConnection Connection;
@@ -28,3 +23,4 @@ public abstract class RepositoryBase
             await Connection.OpenAsync(ct);
     }
 }
+

@@ -6,11 +6,7 @@ using Shipping.Domain.Models;
 
 namespace Shipping.Dal.Repositories;
 
-/// <summary>
-/// Репозиторій на чистому ADO.NET (Крок B.2): ручне відкриття з'єднання,
-/// параметризовані SqlCommand, ручне читання SqlDataReader. Свідомо НЕ
-/// успадковує BaseDapperRepository/Generic Repository.
-/// </summary>
+/// <summary>Репозиторій клієнтів на чистому ADO.NET.</summary>
 public sealed class CustomerRepository : RepositoryBase, ICustomerRepository
 {
     public CustomerRepository(SqlConnection connection, Func<SqlTransaction?> currentTransaction)
@@ -25,7 +21,7 @@ public sealed class CustomerRepository : RepositoryBase, ICustomerRepository
 
         await EnsureOpenAsync(ct);
         await using var command = new SqlCommand(sql, Connection, Transaction);
-        command.Parameters.Add("@Id", SqlDbType.BigInt).Value = id;   // лише параметр, без конкатенації
+        command.Parameters.Add("@Id", SqlDbType.BigInt).Value = id;
 
         await using var reader = await command.ExecuteReaderAsync(ct);
         if (!await reader.ReadAsync(ct)) return null;
@@ -130,3 +126,4 @@ public sealed class CustomerRepository : RepositoryBase, ICustomerRepository
         IsDeleted = reader.GetBoolean(reader.GetOrdinal("IsDeleted"))
     };
 }
+

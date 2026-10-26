@@ -5,18 +5,7 @@ using Shipping.Dal.Repositories;
 
 namespace Shipping.Dal;
 
-/// <summary>
-/// Крок B.4. Одне з'єднання на всю бізнес-операцію; усі репозиторії
-/// отримують це саме з'єднання і доступ до поточної транзакції через
-/// делегат, тому координуються в одній транзакції.
-///
-/// Рівень ізоляції за замовчуванням — ReadCommitted: достатній захист від
-/// "брудного" читання при прийнятному рівні блокувань для операцій
-/// Shipping (короткі транзакції, невисока конкуренція за той самий рядок).
-/// Вищий рівень (Serializable) дав би строгішу узгодженість, але суттєво
-/// підвищив би ризик deadlock між паралельними запитами на той самий
-/// Shipment/Customer — для цього домену це невиправданий компроміс.
-/// </summary>
+/// <summary>Unit of Work з одним з'єднанням і транзакцією (ReadCommitted).</summary>
 public sealed class UnitOfWork : IUnitOfWork
 {
     private readonly SqlConnection _connection;
@@ -67,3 +56,4 @@ public sealed class UnitOfWork : IUnitOfWork
         await _connection.DisposeAsync();
     }
 }
+

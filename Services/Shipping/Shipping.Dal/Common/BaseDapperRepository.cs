@@ -4,13 +4,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Shipping.Dal.Common;
 
-/// <summary>
-/// Спільний CRUD на Dapper + ADO.NET для сутностей, що мапляться на одну
-/// таблицю з первинним ключем Id (BIGINT IDENTITY). Ім'я таблиці — константа
-/// з коду конкретного репозиторію, НЕ вхідні дані користувача, тому підстановка
-/// в текст запиту безпечна (Крок B.3). Конкретні репозиторії додають лише
-/// специфічні запити (JOIN, multi-mapping, виклики процедур).
-/// </summary>
+/// <summary>Базовий CRUD репозиторій на основі Dapper.</summary>
 public abstract class BaseDapperRepository<T> where T : class
 {
     protected readonly SqlConnection Connection;
@@ -52,10 +46,7 @@ public abstract class BaseDapperRepository<T> where T : class
         return rows.AsList();
     }
 
-    /// <summary>
-    /// Створення залежить від схеми конкретної сутності та реалізується
-    /// спеціалізованим репозиторієм параметризованим SQL або процедурою.
-    /// </summary>
+    /// <summary>Додавання нової сутності.</summary>
     public abstract Task<long> AddAsync(T entity, CancellationToken ct = default);
 
     public virtual async Task<bool> DeleteAsync(long id, CancellationToken ct = default)
@@ -67,3 +58,4 @@ public abstract class BaseDapperRepository<T> where T : class
         return affected > 0;
     }
 }
+

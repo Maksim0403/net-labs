@@ -8,10 +8,7 @@ using DbException = Microsoft.Data.SqlClient.SqlException;
 
 namespace Shipping.Dal.Repositories;
 
-/// <summary>
-/// Другий репозиторій на Dapper (Крок B.2): multi-mapping, table-valued
-/// parameter, виклики збережуваних процедур з Лаб. 01.
-/// </summary>
+/// <summary>Репозиторій відправлень на Dapper.</summary>
 public sealed class ShipmentRepository : BaseDapperRepository<Shipment>, IShipmentRepository
 {
     public ShipmentRepository(SqlConnection connection, Func<SqlTransaction?> currentTransaction)
@@ -47,10 +44,7 @@ public sealed class ShipmentRepository : BaseDapperRepository<Shipment>, IShipme
         return rows.AsList();
     }
 
-    /// <summary>
-    /// Шапка + ShipmentDetails (1:1) + ShipmentServices (M:N) одним запитом
-    /// через multi-mapping (приклад з методички, Крок B.2).
-    /// </summary>
+    /// <summary>Отримання відправлення з деталями та послугами (multi-mapping).</summary>
     public async Task<Shipment?> GetWithItemsAsync(long shipmentId, CancellationToken ct = default)
     {
         const string sql = @"
@@ -96,7 +90,6 @@ public sealed class ShipmentRepository : BaseDapperRepository<Shipment>, IShipme
         return rows.AsList();
     }
 
-    /// <summary>Створення відправлення через dbo.usp_CreateShipment (TVP + OUTPUT-параметри).</summary>
     public override async Task<long> AddAsync(Shipment entity, CancellationToken ct = default)
     {
         if (entity.Details is null)
@@ -188,3 +181,4 @@ public sealed class ShipmentRepository : BaseDapperRepository<Shipment>, IShipme
         }
     }
 }
+

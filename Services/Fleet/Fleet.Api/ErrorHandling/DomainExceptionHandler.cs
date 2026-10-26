@@ -5,10 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fleet.Api.ErrorHandling;
 
-/// <summary>
-/// Єдине місце перетворення винятків на HTTP-статуси й ProblemDetails.
-/// Виняток логується один раз, тут; у контролерах немає try/catch.
-/// </summary>
+/// <summary>Централізована обробка помилок (ProblemDetails).</summary>
 public sealed class DomainExceptionHandler(
     IProblemDetailsService problemDetails,
     ILogger<DomainExceptionHandler> logger,
@@ -48,3 +45,4 @@ public sealed class DomainExceptionHandler(
         });
     }
 }
+

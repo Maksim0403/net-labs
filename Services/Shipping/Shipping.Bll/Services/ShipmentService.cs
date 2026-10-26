@@ -32,11 +32,7 @@ public sealed class ShipmentService : IShipmentService
         return shipments.Select(_mapper.Map<ShipmentDto>).ToList();
     }
 
-    /// <summary>
-    /// Створення відправлення. Назву й ціну послуги беремо зі знімка, який
-    /// формує сама процедура usp_CreateShipment на боці БД (Лаб. 01,
-    /// docs/dedup-policy.md) — тут лише перевіряємо, що клієнт існує.
-    /// </summary>
+    /// <summary>Створення відправлення з перевіркою існування клієнта.</summary>
     public async Task<ShipmentDto> CreateAsync(CreateShipmentDto input, CancellationToken ct = default)
     {
         var customer = await _uow.Customers.GetByIdAsync(input.CustomerId, ct)
@@ -78,15 +74,7 @@ public sealed class ShipmentService : IShipmentService
         return _mapper.Map<ShipmentDto>(created);
     }
 
-    /// <summary>
-    /// Крок C.2 — флагманська транзакційна операція: зміна статусу
-    /// відправлення (через процедуру з Лаб. 01) + оновлення запису клієнта,
-    /// координовані Unit of Work через ДВА різні репозиторії (Shipments і
-    /// Customers) в одній SQL-транзакції. Якщо другий крок кине виняток —
-    /// RollbackAsync поверне статус відправлення назад (контрольна точка
-    /// методички: "операція при штучній помилці в другому репозиторії
-    /// відкочує зміни першого").
-    /// </summary>
+    /// <summary>Підтвердження відправлення та оновлення клієнта в одній транзакції UoW.</summary>
     public async Task ConfirmAsync(long shipmentId, CancellationToken ct = default)
     {
         var shipment = await _uow.Shipments.GetWithItemsAsync(shipmentId, ct)
@@ -98,11 +86,7 @@ public sealed class ShipmentService : IShipmentService
         await _uow.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);
         try
         {
-            // Репозиторій №1: Shipments — зміна статусу через процедуру БД
             await _uow.Shipments.ConfirmAsync(shipmentId, "shipping-api", ct);
-
-            // Репозиторій №2: Customers — оновлення аудитних полів клієнта
-            // (в одній транзакції з кроком вище)
             await _uow.Customers.TouchAsync(shipment.CustomerId, "shipping-api", ct);
 
             await _uow.CommitAsync(ct);
@@ -147,3 +131,4 @@ public sealed class ShipmentService : IShipmentService
         }
     }
 }
+
