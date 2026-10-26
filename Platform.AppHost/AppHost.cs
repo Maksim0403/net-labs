@@ -4,7 +4,6 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var useLocalSqlServer = builder.Configuration.GetValue<bool>("UseLocalSqlServer");
 
-
 if (useLocalSqlServer)
 {
     var shippingDb = builder.AddConnectionString("ShippingDb");
@@ -48,4 +47,8 @@ else
         .WithExternalHttpEndpoints();
 }
 
+builder.AddProject<Projects.Reviews_WebApi>("reviews-webapi")
+    .WithExternalHttpEndpoints();
+
 builder.Build().Run();
+

@@ -19,5 +19,7 @@
 		<ProjectReference Include="..\Services\Shipping\Shipping.Api\Shipping.Api.csproj" />
 		<ProjectReference Include="..\Platform.DatabaseInitializer\Platform.DatabaseInitializer.csproj" />
 		<ProjectReference Include="..\Services\Fleet\Fleet.Api\Fleet.Api.csproj" />
+		<ProjectReference Include="..\Services\Reviews\Reviews.WebApi\Reviews.WebApi.csproj" />
 	</ItemGroup>
+</Project>
 </Project>
