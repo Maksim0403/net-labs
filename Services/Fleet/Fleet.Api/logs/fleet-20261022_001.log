@@ -1,0 +1,32 @@
+2026-10-22 23:59:33.252 +03:00 [INF] Executed DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-22 23:59:33.320 +03:00 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-22 23:59:33.322 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-22 23:59:33.323 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-22 23:59:33.342 +03:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-10-22 23:59:33.580 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[Code] = N'CV-01'
+2026-10-22 23:59:33.648 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Vehicles] AS [v]
+        WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[PlateNumber] = N'AA1234BT') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-22 23:59:33.656 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Couriers] AS [c]
+        WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[Phone] = N'+380991112233') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END

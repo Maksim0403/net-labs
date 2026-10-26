@@ -1,0 +1,850 @@
+2026-10-22 18:04:14.798 +03:00 [WRN] Entity 'Courier' has a global query filter defined and is the required end of a relationship with the entity 'CourierLicense'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-10-22 18:04:14.828 +03:00 [WRN] Entity 'Courier' has a global query filter defined and is the required end of a relationship with the entity 'CourierZone'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2026-10-22 18:04:15.285 +03:00 [INF] Executed DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-22 18:04:15.313 +03:00 [INF] Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-22 18:04:15.315 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-22 18:04:15.316 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-22 18:04:15.333 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-10-22 18:05:48.910 +03:00 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-22 18:05:48.966 +03:00 [INF] Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-22 18:05:48.969 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-22 18:05:48.970 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-22 18:05:48.987 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-10-22 18:05:49.166 +03:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[Code] = N'CV-01'
+2026-10-22 18:05:49.222 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Vehicles] AS [v]
+        WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[PlateNumber] = N'AA1234BT') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-22 18:05:49.277 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Couriers] AS [c]
+        WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[Phone] = N'+380991112233') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-22 18:05:49.285 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+FROM [DeliveryZones] AS [d]
+WHERE [d].[IsDeleted] = CAST(0 AS bit) AND [d].[Name] = N'Центр'
+2026-10-22 18:05:49.468 +03:00 [INF] Executed DbCommand (29ms) [Parameters=[@p0='?' (DbType = DateTime2), @p1='?' (Size = 100), @p2='?' (Size = 150), @p3='?' (DbType = Boolean), @p4='?' (Size = 20), @p5='?' (DbType = DateTime2), @p6='?' (Size = 100), @p7='?' (DbType = Int64), @p8='?' (Precision = 9) (Scale = 2) (DbType = Decimal), @p9='?' (DbType = DateTime2), @p10='?' (Size = 100), @p11='?' (DbType = Boolean), @p12='?' (Size = 20), @p13='?' (DbType = DateTime2), @p14='?' (Size = 100), @p15='?' (Size = 30), @p16='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SET NOCOUNT ON;
+INSERT INTO [Couriers] ([CreatedAt], [CreatedBy], [FullName], [IsDeleted], [Phone], [UpdatedAt], [UpdatedBy], [WarehouseId])
+OUTPUT INSERTED.[CourierId], INSERTED.[RowVersion]
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7);
+INSERT INTO [Vehicles] ([CapacityKg], [CreatedAt], [CreatedBy], [IsDeleted], [PlateNumber], [UpdatedAt], [UpdatedBy], [VehicleType], [WarehouseId])
+OUTPUT INSERTED.[VehicleId], INSERTED.[RowVersion]
+VALUES (@p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16);
+2026-10-22 18:05:49.486 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@p17='?' (DbType = Int64), @p18='?' (Size = 5), @p19='?' (DbType = Date), @p20='?' (Size = 30), @p21='?' (DbType = Int64), @p22='?' (DbType = Int64), @p23='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SET NOCOUNT ON;
+INSERT INTO [CourierLicenses] ([CourierId], [Category], [ExpiresOn], [Number])
+VALUES (@p17, @p18, @p19, @p20);
+INSERT INTO [CourierZones] ([CourierId], [ZoneId], [AssignedAt])
+VALUES (@p21, @p22, @p23);
+2026-10-22 18:05:49.613 +03:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address http://[::1]:5050: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+ ---> System.Net.Sockets.SocketException (10048): Only one usage of each socket address (protocol/network address/port) is normally permitted.
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindAsync(ListenOptions[] listenOptions, AddressBindContext context, Func`2 useHttps, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__15_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2026-10-22 23:23:15.412 +03:00 [INF] Executed DbCommand (27ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-22 23:23:15.485 +03:00 [INF] Executed DbCommand (21ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-22 23:23:15.490 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-22 23:23:15.491 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-22 23:23:15.516 +03:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-10-22 23:23:15.770 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[Code] = N'CV-01'
+2026-10-22 23:23:15.857 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Vehicles] AS [v]
+        WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[PlateNumber] = N'AA1234BT') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-22 23:23:15.870 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Couriers] AS [c]
+        WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[Phone] = N'+380991112233') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-22 23:25:03.322 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software AutoMapper. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-10-22 23:25:03.438 +03:00 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+2026-10-22 23:25:03.648 +03:00 [INF] Executed DbCommand (78ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[CourierId], [t].[CreatedAt], [t].[CreatedBy], [t].[FullName], [t].[IsDeleted], [t].[Phone], [t].[RowVersion], [t].[UpdatedAt], [t].[UpdatedBy], [t].[WarehouseId], [t1].[CourierId], [t1].[ZoneId], [t1].[AssignedAt], [t1].[ZoneId0], [t1].[CreatedAt], [t1].[CreatedBy], [t1].[IsDeleted], [t1].[Name], [t1].[UpdatedAt], [t1].[UpdatedBy], [t1].[CourierId0]
+FROM (
+    SELECT TOP(@__p_0) [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+    FROM [Couriers] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [c].[FullName], [c].[CourierId]
+) AS [t]
+LEFT JOIN (
+    SELECT [c0].[CourierId], [c0].[ZoneId], [c0].[AssignedAt], [t2].[ZoneId] AS [ZoneId0], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[IsDeleted], [t2].[Name], [t2].[UpdatedAt], [t2].[UpdatedBy], [t0].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c0]
+    INNER JOIN (
+        SELECT [c1].[CourierId], [c1].[IsDeleted]
+        FROM [Couriers] AS [c1]
+        WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c0].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t2] ON [c0].[ZoneId] = [t2].[ZoneId]
+    WHERE [t0].[IsDeleted] = CAST(0 AS bit) AND [t2].[IsDeleted] = CAST(0 AS bit)
+) AS [t1] ON [t].[CourierId] = [t1].[CourierId]
+ORDER BY [t].[FullName], [t].[CourierId], [t1].[CourierId], [t1].[ZoneId], [t1].[CourierId0]
+2026-10-22 23:25:03.737 +03:00 [INF] HTTP GET /api/couriers responded 200 in 607.3143 ms
+2026-10-22 23:25:11.375 +03:00 [INF] Executed DbCommand (41ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t2].[CourierId], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[FullName], [t2].[IsDeleted], [t2].[Phone], [t2].[RowVersion], [t2].[UpdatedAt], [t2].[UpdatedBy], [t2].[WarehouseId], [t2].[CourierId0], [t2].[Category], [t2].[ExpiresOn], [t2].[Number], [t2].[WarehouseId0], [t2].[Address], [t2].[City], [t2].[Code], [t2].[CreatedAt0], [t2].[CreatedBy0], [t2].[IsDeleted0], [t2].[RowVersion0], [t2].[UpdatedAt0], [t2].[UpdatedBy0], [t2].[CourierId00], [t3].[CourierId], [t3].[ZoneId], [t3].[AssignedAt], [t3].[ZoneId0], [t3].[CreatedAt], [t3].[CreatedBy], [t3].[IsDeleted], [t3].[Name], [t3].[UpdatedAt], [t3].[UpdatedBy], [t3].[CourierId0]
+FROM (
+    SELECT TOP(1) [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId], [t0].[CourierId] AS [CourierId0], [t0].[Category], [t0].[ExpiresOn], [t0].[Number], [t1].[WarehouseId] AS [WarehouseId0], [t1].[Address], [t1].[City], [t1].[Code], [t1].[CreatedAt] AS [CreatedAt0], [t1].[CreatedBy] AS [CreatedBy0], [t1].[IsDeleted] AS [IsDeleted0], [t1].[RowVersion] AS [RowVersion0], [t1].[UpdatedAt] AS [UpdatedAt0], [t1].[UpdatedBy] AS [UpdatedBy0], [t0].[CourierId0] AS [CourierId00]
+    FROM [Couriers] AS [c]
+    LEFT JOIN (
+        SELECT [c0].[CourierId], [c0].[Category], [c0].[ExpiresOn], [c0].[Number], [t].[CourierId] AS [CourierId0]
+        FROM [CourierLicenses] AS [c0]
+        INNER JOIN (
+            SELECT [c1].[CourierId], [c1].[IsDeleted]
+            FROM [Couriers] AS [c1]
+            WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+        ) AS [t] ON [c0].[CourierId] = [t].[CourierId]
+        WHERE [t].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+        FROM [Warehouses] AS [w]
+        WHERE [w].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t1] ON [c].[WarehouseId] = [t1].[WarehouseId]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[CourierId] = @__id_0
+) AS [t2]
+LEFT JOIN (
+    SELECT [c2].[CourierId], [c2].[ZoneId], [c2].[AssignedAt], [t5].[ZoneId] AS [ZoneId0], [t5].[CreatedAt], [t5].[CreatedBy], [t5].[IsDeleted], [t5].[Name], [t5].[UpdatedAt], [t5].[UpdatedBy], [t4].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c2]
+    INNER JOIN (
+        SELECT [c3].[CourierId], [c3].[IsDeleted]
+        FROM [Couriers] AS [c3]
+        WHERE [c3].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t4] ON [c2].[CourierId] = [t4].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t5] ON [c2].[ZoneId] = [t5].[ZoneId]
+    WHERE [t4].[IsDeleted] = CAST(0 AS bit) AND [t5].[IsDeleted] = CAST(0 AS bit)
+) AS [t3] ON [t2].[CourierId] = [t3].[CourierId]
+ORDER BY [t2].[CourierId], [t2].[CourierId0], [t2].[CourierId00], [t2].[WarehouseId0], [t3].[CourierId], [t3].[ZoneId], [t3].[CourierId0]
+2026-10-22 23:25:11.492 +03:00 [INF] HTTP GET /api/couriers/1 responded 200 in 279.8694 ms
+2026-10-22 23:25:19.254 +03:00 [INF] Executed DbCommand (10ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[WarehouseId] = @__id_0
+2026-10-22 23:25:19.300 +03:00 [INF] Executed DbCommand (13ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT [v].[VehicleId], [v].[CapacityKg], [v].[CreatedAt], [v].[CreatedBy], [v].[IsDeleted], [v].[PlateNumber], [v].[RowVersion], [v].[UpdatedAt], [v].[UpdatedBy], [v].[VehicleType], [v].[WarehouseId]
+FROM [Vehicles] AS [v]
+WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[WarehouseId] = @__p_0
+2026-10-22 23:25:19.362 +03:00 [INF] HTTP GET /api/warehouses/1 responded 200 in 142.9448 ms
+2026-10-22 23:25:19.494 +03:00 [INF] HTTP GET /favicon.ico responded 404 in 0.4393 ms
+2026-10-22 23:25:25.061 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[WarehouseId] = @__id_0
+2026-10-22 23:25:25.075 +03:00 [INF] Executed DbCommand (10ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT [v].[VehicleId], [v].[CapacityKg], [v].[CreatedAt], [v].[CreatedBy], [v].[IsDeleted], [v].[PlateNumber], [v].[RowVersion], [v].[UpdatedAt], [v].[UpdatedBy], [v].[VehicleType], [v].[WarehouseId]
+FROM [Vehicles] AS [v]
+WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[WarehouseId] = @__p_0
+2026-10-22 23:25:25.079 +03:00 [INF] HTTP GET /api/warehouses/1 responded 200 in 33.2608 ms
+2026-10-22 23:25:31.414 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[WarehouseId] = @__id_0
+2026-10-22 23:25:31.422 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT [v].[VehicleId], [v].[CapacityKg], [v].[CreatedAt], [v].[CreatedBy], [v].[IsDeleted], [v].[PlateNumber], [v].[RowVersion], [v].[UpdatedAt], [v].[UpdatedBy], [v].[VehicleType], [v].[WarehouseId]
+FROM [Vehicles] AS [v]
+WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[WarehouseId] = @__p_0
+2026-10-22 23:25:31.423 +03:00 [INF] HTTP GET /api/warehouses/1 responded 200 in 19.6404 ms
+2026-10-22 23:25:58.251 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+2026-10-22 23:25:58.291 +03:00 [INF] Executed DbCommand (36ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[CourierId], [t].[CreatedAt], [t].[CreatedBy], [t].[FullName], [t].[IsDeleted], [t].[Phone], [t].[RowVersion], [t].[UpdatedAt], [t].[UpdatedBy], [t].[WarehouseId], [t1].[CourierId], [t1].[ZoneId], [t1].[AssignedAt], [t1].[ZoneId0], [t1].[CreatedAt], [t1].[CreatedBy], [t1].[IsDeleted], [t1].[Name], [t1].[UpdatedAt], [t1].[UpdatedBy], [t1].[CourierId0]
+FROM (
+    SELECT TOP(@__p_0) [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+    FROM [Couriers] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [c].[FullName], [c].[CourierId]
+) AS [t]
+LEFT JOIN (
+    SELECT [c0].[CourierId], [c0].[ZoneId], [c0].[AssignedAt], [t2].[ZoneId] AS [ZoneId0], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[IsDeleted], [t2].[Name], [t2].[UpdatedAt], [t2].[UpdatedBy], [t0].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c0]
+    INNER JOIN (
+        SELECT [c1].[CourierId], [c1].[IsDeleted]
+        FROM [Couriers] AS [c1]
+        WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c0].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t2] ON [c0].[ZoneId] = [t2].[ZoneId]
+    WHERE [t0].[IsDeleted] = CAST(0 AS bit) AND [t2].[IsDeleted] = CAST(0 AS bit)
+) AS [t1] ON [t].[CourierId] = [t1].[CourierId]
+ORDER BY [t].[FullName], [t].[CourierId], [t1].[CourierId], [t1].[ZoneId], [t1].[CourierId0]
+2026-10-22 23:25:58.292 +03:00 [INF] HTTP GET /api/couriers responded 200 in 51.5967 ms
+2026-10-22 23:26:04.318 +03:00 [INF] HTTP POST /api/couriers responded 400 in 71.1481 ms
+2026-10-22 23:26:42.216 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[WarehouseId] = @__p_0
+2026-10-22 23:26:42.226 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__phone_0='?' (Size = 20)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Couriers] AS [c]
+        WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[Phone] = @__phone_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-22 23:26:42.229 +03:00 [ERR] HTTP POST /api/couriers responded 500 in 56.5475 ms
+Fleet.Domain.Exceptions.ConflictException: Courier with phone '+380991112233' already exists
+   at Fleet.Bll.Services.CourierService.CreateAsync(CreateCourierDto input, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Bll\Services\CourierService.cs:line 48
+   at Fleet.Api.Controllers.CouriersController.Create(CreateCourierDto input, IValidator`1 validator, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Controllers\CouriersController.cs:line 35
+   at lambda_method471(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Program.<>c.<<<Main>$>b__0_4>d.MoveNext() in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Program.cs:line 77
+--- End of stack trace from previous location ---
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2026-10-22 23:26:42.249 +03:00 [ERR] An unhandled exception has occurred while executing the request.
+Fleet.Domain.Exceptions.ConflictException: Courier with phone '+380991112233' already exists
+   at Fleet.Bll.Services.CourierService.CreateAsync(CreateCourierDto input, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Bll\Services\CourierService.cs:line 48
+   at Fleet.Api.Controllers.CouriersController.Create(CreateCourierDto input, IValidator`1 validator, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Controllers\CouriersController.cs:line 35
+   at lambda_method471(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Program.<>c.<<<Main>$>b__0_4>d.MoveNext() in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Program.cs:line 77
+--- End of stack trace from previous location ---
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+2026-10-22 23:26:42.256 +03:00 [WRN] ConflictException on /api/couriers: Courier with phone '+380991112233' already exists
+2026-10-22 23:26:48.362 +03:00 [INF] Executed DbCommand (34ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t2].[CourierId], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[FullName], [t2].[IsDeleted], [t2].[Phone], [t2].[RowVersion], [t2].[UpdatedAt], [t2].[UpdatedBy], [t2].[WarehouseId], [t2].[CourierId0], [t2].[Category], [t2].[ExpiresOn], [t2].[Number], [t2].[WarehouseId0], [t2].[Address], [t2].[City], [t2].[Code], [t2].[CreatedAt0], [t2].[CreatedBy0], [t2].[IsDeleted0], [t2].[RowVersion0], [t2].[UpdatedAt0], [t2].[UpdatedBy0], [t2].[CourierId00], [t3].[CourierId], [t3].[ZoneId], [t3].[AssignedAt], [t3].[ZoneId0], [t3].[CreatedAt], [t3].[CreatedBy], [t3].[IsDeleted], [t3].[Name], [t3].[UpdatedAt], [t3].[UpdatedBy], [t3].[CourierId0]
+FROM (
+    SELECT TOP(1) [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId], [t0].[CourierId] AS [CourierId0], [t0].[Category], [t0].[ExpiresOn], [t0].[Number], [t1].[WarehouseId] AS [WarehouseId0], [t1].[Address], [t1].[City], [t1].[Code], [t1].[CreatedAt] AS [CreatedAt0], [t1].[CreatedBy] AS [CreatedBy0], [t1].[IsDeleted] AS [IsDeleted0], [t1].[RowVersion] AS [RowVersion0], [t1].[UpdatedAt] AS [UpdatedAt0], [t1].[UpdatedBy] AS [UpdatedBy0], [t0].[CourierId0] AS [CourierId00]
+    FROM [Couriers] AS [c]
+    LEFT JOIN (
+        SELECT [c0].[CourierId], [c0].[Category], [c0].[ExpiresOn], [c0].[Number], [t].[CourierId] AS [CourierId0]
+        FROM [CourierLicenses] AS [c0]
+        INNER JOIN (
+            SELECT [c1].[CourierId], [c1].[IsDeleted]
+            FROM [Couriers] AS [c1]
+            WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+        ) AS [t] ON [c0].[CourierId] = [t].[CourierId]
+        WHERE [t].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+        FROM [Warehouses] AS [w]
+        WHERE [w].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t1] ON [c].[WarehouseId] = [t1].[WarehouseId]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[CourierId] = @__id_0
+) AS [t2]
+LEFT JOIN (
+    SELECT [c2].[CourierId], [c2].[ZoneId], [c2].[AssignedAt], [t5].[ZoneId] AS [ZoneId0], [t5].[CreatedAt], [t5].[CreatedBy], [t5].[IsDeleted], [t5].[Name], [t5].[UpdatedAt], [t5].[UpdatedBy], [t4].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c2]
+    INNER JOIN (
+        SELECT [c3].[CourierId], [c3].[IsDeleted]
+        FROM [Couriers] AS [c3]
+        WHERE [c3].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t4] ON [c2].[CourierId] = [t4].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t5] ON [c2].[ZoneId] = [t5].[ZoneId]
+    WHERE [t4].[IsDeleted] = CAST(0 AS bit) AND [t5].[IsDeleted] = CAST(0 AS bit)
+) AS [t3] ON [t2].[CourierId] = [t3].[CourierId]
+ORDER BY [t2].[CourierId], [t2].[CourierId0], [t2].[CourierId00], [t2].[WarehouseId0], [t3].[CourierId], [t3].[ZoneId], [t3].[CourierId0]
+2026-10-22 23:26:48.364 +03:00 [ERR] HTTP GET /api/couriers/999999 responded 500 in 38.7978 ms
+Fleet.Domain.Exceptions.EntityNotFoundException: Courier 999999 not found
+   at Fleet.Bll.Services.CourierService.GetByIdAsync(Int64 id, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Bll\Services\CourierService.cs:line 24
+   at Fleet.Api.Controllers.CouriersController.GetById(Int64 id, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Controllers\CouriersController.cs:line 25
+   at lambda_method194(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Program.<>c.<<<Main>$>b__0_4>d.MoveNext() in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Program.cs:line 77
+--- End of stack trace from previous location ---
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2026-10-22 23:26:48.366 +03:00 [ERR] An unhandled exception has occurred while executing the request.
+Fleet.Domain.Exceptions.EntityNotFoundException: Courier 999999 not found
+   at Fleet.Bll.Services.CourierService.GetByIdAsync(Int64 id, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Bll\Services\CourierService.cs:line 24
+   at Fleet.Api.Controllers.CouriersController.GetById(Int64 id, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Controllers\CouriersController.cs:line 25
+   at lambda_method194(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Program.<>c.<<<Main>$>b__0_4>d.MoveNext() in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Program.cs:line 77
+--- End of stack trace from previous location ---
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+2026-10-22 23:26:48.368 +03:00 [WRN] EntityNotFoundException on /api/couriers/999999: Courier 999999 not found
+2026-10-22 23:26:53.622 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[WarehouseId] = @__p_0
+2026-10-22 23:26:53.628 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__phone_0='?' (Size = 20)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Couriers] AS [c]
+        WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[Phone] = @__phone_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-22 23:26:53.779 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[@p0='?' (DbType = DateTime2), @p1='?' (Size = 100), @p2='?' (Size = 150), @p3='?' (DbType = Boolean), @p4='?' (Size = 20), @p5='?' (DbType = DateTime2), @p6='?' (Size = 100), @p7='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [Couriers] ([CreatedAt], [CreatedBy], [FullName], [IsDeleted], [Phone], [UpdatedAt], [UpdatedBy], [WarehouseId])
+OUTPUT INSERTED.[CourierId], INSERTED.[RowVersion]
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7);
+2026-10-22 23:26:53.830 +03:00 [INF] HTTP POST /api/couriers responded 201 in 218.1367 ms
+2026-10-22 23:27:50.968 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+2026-10-22 23:27:51.002 +03:00 [INF] Executed DbCommand (32ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[CourierId], [t].[CreatedAt], [t].[CreatedBy], [t].[FullName], [t].[IsDeleted], [t].[Phone], [t].[RowVersion], [t].[UpdatedAt], [t].[UpdatedBy], [t].[WarehouseId], [t1].[CourierId], [t1].[ZoneId], [t1].[AssignedAt], [t1].[ZoneId0], [t1].[CreatedAt], [t1].[CreatedBy], [t1].[IsDeleted], [t1].[Name], [t1].[UpdatedAt], [t1].[UpdatedBy], [t1].[CourierId0]
+FROM (
+    SELECT TOP(@__p_0) [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+    FROM [Couriers] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [c].[FullName], [c].[CourierId]
+) AS [t]
+LEFT JOIN (
+    SELECT [c0].[CourierId], [c0].[ZoneId], [c0].[AssignedAt], [t2].[ZoneId] AS [ZoneId0], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[IsDeleted], [t2].[Name], [t2].[UpdatedAt], [t2].[UpdatedBy], [t0].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c0]
+    INNER JOIN (
+        SELECT [c1].[CourierId], [c1].[IsDeleted]
+        FROM [Couriers] AS [c1]
+        WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c0].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t2] ON [c0].[ZoneId] = [t2].[ZoneId]
+    WHERE [t0].[IsDeleted] = CAST(0 AS bit) AND [t2].[IsDeleted] = CAST(0 AS bit)
+) AS [t1] ON [t].[CourierId] = [t1].[CourierId]
+ORDER BY [t].[FullName], [t].[CourierId], [t1].[CourierId], [t1].[ZoneId], [t1].[CourierId0]
+2026-10-22 23:27:51.003 +03:00 [INF] HTTP GET /api/couriers responded 200 in 47.2178 ms
+2026-10-22 23:27:59.988 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+2026-10-22 23:28:00.075 +03:00 [INF] Executed DbCommand (53ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[CourierId], [t].[CreatedAt], [t].[CreatedBy], [t].[FullName], [t].[IsDeleted], [t].[Phone], [t].[RowVersion], [t].[UpdatedAt], [t].[UpdatedBy], [t].[WarehouseId], [t1].[CourierId], [t1].[ZoneId], [t1].[AssignedAt], [t1].[ZoneId0], [t1].[CreatedAt], [t1].[CreatedBy], [t1].[IsDeleted], [t1].[Name], [t1].[UpdatedAt], [t1].[UpdatedBy], [t1].[CourierId0]
+FROM (
+    SELECT [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+    FROM [Couriers] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [c].[FullName], [c].[CourierId]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_0 ROWS ONLY
+) AS [t]
+LEFT JOIN (
+    SELECT [c0].[CourierId], [c0].[ZoneId], [c0].[AssignedAt], [t2].[ZoneId] AS [ZoneId0], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[IsDeleted], [t2].[Name], [t2].[UpdatedAt], [t2].[UpdatedBy], [t0].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c0]
+    INNER JOIN (
+        SELECT [c1].[CourierId], [c1].[IsDeleted]
+        FROM [Couriers] AS [c1]
+        WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c0].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t2] ON [c0].[ZoneId] = [t2].[ZoneId]
+    WHERE [t0].[IsDeleted] = CAST(0 AS bit) AND [t2].[IsDeleted] = CAST(0 AS bit)
+) AS [t1] ON [t].[CourierId] = [t1].[CourierId]
+ORDER BY [t].[FullName], [t].[CourierId], [t1].[CourierId], [t1].[ZoneId], [t1].[CourierId0]
+2026-10-22 23:28:00.076 +03:00 [INF] HTTP GET /api/couriers responded 200 in 98.6346 ms
+2026-10-22 23:28:09.925 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+2026-10-22 23:28:09.951 +03:00 [INF] Executed DbCommand (24ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[CourierId], [t].[CreatedAt], [t].[CreatedBy], [t].[FullName], [t].[IsDeleted], [t].[Phone], [t].[RowVersion], [t].[UpdatedAt], [t].[UpdatedBy], [t].[WarehouseId], [t1].[CourierId], [t1].[ZoneId], [t1].[AssignedAt], [t1].[ZoneId0], [t1].[CreatedAt], [t1].[CreatedBy], [t1].[IsDeleted], [t1].[Name], [t1].[UpdatedAt], [t1].[UpdatedBy], [t1].[CourierId0]
+FROM (
+    SELECT [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+    FROM [Couriers] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [c].[FullName], [c].[CourierId]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_0 ROWS ONLY
+) AS [t]
+LEFT JOIN (
+    SELECT [c0].[CourierId], [c0].[ZoneId], [c0].[AssignedAt], [t2].[ZoneId] AS [ZoneId0], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[IsDeleted], [t2].[Name], [t2].[UpdatedAt], [t2].[UpdatedBy], [t0].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c0]
+    INNER JOIN (
+        SELECT [c1].[CourierId], [c1].[IsDeleted]
+        FROM [Couriers] AS [c1]
+        WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c0].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t2] ON [c0].[ZoneId] = [t2].[ZoneId]
+    WHERE [t0].[IsDeleted] = CAST(0 AS bit) AND [t2].[IsDeleted] = CAST(0 AS bit)
+) AS [t1] ON [t].[CourierId] = [t1].[CourierId]
+ORDER BY [t].[FullName], [t].[CourierId], [t1].[CourierId], [t1].[ZoneId], [t1].[CourierId0]
+2026-10-22 23:28:09.952 +03:00 [INF] HTTP GET /api/couriers responded 200 in 32.6631 ms
+2026-10-22 23:29:17.783 +03:00 [INF] Executed DbCommand (21ms) [Parameters=[@__zoneName_0='?' (Size = 100), @__since_1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[CourierId], [t].[CreatedAt], [t].[CreatedBy], [t].[FullName], [t].[IsDeleted], [t].[Phone], [t].[RowVersion], [t].[UpdatedAt], [t].[UpdatedBy], [t].[WarehouseId]
+FROM [CourierZones] AS [c]
+INNER JOIN (
+    SELECT [c0].[CourierId], [c0].[CreatedAt], [c0].[CreatedBy], [c0].[FullName], [c0].[IsDeleted], [c0].[Phone], [c0].[RowVersion], [c0].[UpdatedAt], [c0].[UpdatedBy], [c0].[WarehouseId]
+    FROM [Couriers] AS [c0]
+    WHERE [c0].[IsDeleted] = CAST(0 AS bit)
+) AS [t] ON [c].[CourierId] = [t].[CourierId]
+INNER JOIN (
+    SELECT [d].[ZoneId], [d].[IsDeleted], [d].[Name]
+    FROM [DeliveryZones] AS [d]
+    WHERE [d].[IsDeleted] = CAST(0 AS bit)
+) AS [t0] ON [c].[ZoneId] = [t0].[ZoneId]
+WHERE [t].[IsDeleted] = CAST(0 AS bit) AND [t0].[IsDeleted] = CAST(0 AS bit) AND [t0].[Name] = @__zoneName_0 AND [c].[AssignedAt] >= @__since_1
+ORDER BY [c].[AssignedAt] DESC
+2026-10-22 23:29:17.785 +03:00 [INF] HTTP GET /api/zones/Центр/couriers responded 200 in 40.1951 ms
+2026-10-22 23:29:22.194 +03:00 [INF] HTTP POST /api/routes responded 400 in 16.2627 ms
+2026-10-22 23:29:40.396 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[CourierId] = @__p_0
+2026-10-22 23:29:40.412 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [v].[VehicleId], [v].[CapacityKg], [v].[CreatedAt], [v].[CreatedBy], [v].[IsDeleted], [v].[PlateNumber], [v].[RowVersion], [v].[UpdatedAt], [v].[UpdatedBy], [v].[VehicleType], [v].[WarehouseId]
+FROM [Vehicles] AS [v]
+WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[VehicleId] = @__p_0
+2026-10-22 23:29:40.424 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+FROM [DeliveryZones] AS [d]
+WHERE [d].[IsDeleted] = CAST(0 AS bit) AND [d].[ZoneId] = @__p_0
+2026-10-22 23:29:40.443 +03:00 [INF] Executed DbCommand (11ms) [Parameters=[@__courierId_0='?' (DbType = Int64), @__date_1='?' (DbType = Date)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Routes] AS [r]
+WHERE [r].[IsDeleted] = CAST(0 AS bit) AND [r].[CourierId] = @__courierId_0 AND [r].[PlannedDate] = @__date_1 AND [r].[Status] <> N'Cancelled'
+2026-10-22 23:29:40.524 +03:00 [INF] Executed DbCommand (11ms) [Parameters=[@p0='?' (DbType = Int64), @p1='?' (DbType = DateTime2), @p2='?' (Size = 100), @p3='?' (DbType = Boolean), @p4='?' (DbType = Date), @p5='?' (Precision = 8) (Scale = 2) (DbType = Decimal), @p6='?' (Size = 20), @p7='?' (DbType = DateTime2), @p8='?' (Size = 100), @p9='?' (DbType = Int64), @p10='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [Routes] ([CourierId], [CreatedAt], [CreatedBy], [IsDeleted], [PlannedDate], [PlannedDistanceKm], [Status], [UpdatedAt], [UpdatedBy], [VehicleId], [ZoneId])
+OUTPUT INSERTED.[RouteId], INSERTED.[RowVersion]
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10);
+2026-10-22 23:29:40.534 +03:00 [INF] HTTP POST /api/routes responded 201 in 177.0820 ms
+2026-10-22 23:30:04.786 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[CourierId] = @__p_0
+2026-10-22 23:30:04.791 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [v].[VehicleId], [v].[CapacityKg], [v].[CreatedAt], [v].[CreatedBy], [v].[IsDeleted], [v].[PlateNumber], [v].[RowVersion], [v].[UpdatedAt], [v].[UpdatedBy], [v].[VehicleType], [v].[WarehouseId]
+FROM [Vehicles] AS [v]
+WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[VehicleId] = @__p_0
+2026-10-22 23:30:04.796 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+FROM [DeliveryZones] AS [d]
+WHERE [d].[IsDeleted] = CAST(0 AS bit) AND [d].[ZoneId] = @__p_0
+2026-10-22 23:30:04.823 +03:00 [INF] Executed DbCommand (26ms) [Parameters=[@__courierId_0='?' (DbType = Int64), @__date_1='?' (DbType = Date)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Routes] AS [r]
+WHERE [r].[IsDeleted] = CAST(0 AS bit) AND [r].[CourierId] = @__courierId_0 AND [r].[PlannedDate] = @__date_1 AND [r].[Status] <> N'Cancelled'
+2026-10-22 23:30:04.824 +03:00 [ERR] HTTP POST /api/routes responded 500 in 46.9899 ms
+Fleet.Domain.Exceptions.ConflictException: Courier 1 already has a route on 2026-10-25
+   at Fleet.Bll.Services.RouteService.PlanAsync(CreateRouteDto input, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Bll\Services\RouteService.cs:line 35
+   at Fleet.Api.Controllers.RoutesController.Create(CreateRouteDto input, IValidator`1 validator, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Controllers\RoutesController.cs:line 24
+   at lambda_method569(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Program.<>c.<<<Main>$>b__0_4>d.MoveNext() in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Program.cs:line 77
+--- End of stack trace from previous location ---
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2026-10-22 23:30:04.826 +03:00 [ERR] An unhandled exception has occurred while executing the request.
+Fleet.Domain.Exceptions.ConflictException: Courier 1 already has a route on 2026-10-25
+   at Fleet.Bll.Services.RouteService.PlanAsync(CreateRouteDto input, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Bll\Services\RouteService.cs:line 35
+   at Fleet.Api.Controllers.RoutesController.Create(CreateRouteDto input, IValidator`1 validator, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Controllers\RoutesController.cs:line 24
+   at lambda_method569(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Program.<>c.<<<Main>$>b__0_4>d.MoveNext() in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Program.cs:line 77
+--- End of stack trace from previous location ---
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+2026-10-22 23:30:04.828 +03:00 [WRN] ConflictException on /api/routes: Courier 1 already has a route on 2026-10-25
+2026-10-22 23:30:10.641 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[RouteId], [r].[CourierId], [r].[CreatedAt], [r].[CreatedBy], [r].[IsDeleted], [r].[PlannedDate], [r].[PlannedDistanceKm], [r].[RowVersion], [r].[Status], [r].[UpdatedAt], [r].[UpdatedBy], [r].[VehicleId], [r].[ZoneId]
+FROM [Routes] AS [r]
+WHERE [r].[IsDeleted] = CAST(0 AS bit) AND [r].[RouteId] = @__p_0
+2026-10-22 23:30:10.665 +03:00 [INF] Executed DbCommand (14ms) [Parameters=[@p3='?' (DbType = Int64), @p4='?' (Size = 8) (DbType = Binary), @p0='?' (Size = 20), @p1='?' (DbType = DateTime2), @p2='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+UPDATE [Routes] SET [Status] = @p0, [UpdatedAt] = @p1, [UpdatedBy] = @p2
+OUTPUT INSERTED.[RowVersion]
+WHERE [RouteId] = @p3 AND [RowVersion] = @p4;
+2026-10-22 23:30:10.667 +03:00 [INF] HTTP POST /api/routes/1/start responded 204 in 44.2768 ms
+2026-10-22 23:30:26.139 +03:00 [INF] Executed DbCommand (11ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[RouteId], [r].[CourierId], [r].[CreatedAt], [r].[CreatedBy], [r].[IsDeleted], [r].[PlannedDate], [r].[PlannedDistanceKm], [r].[RowVersion], [r].[Status], [r].[UpdatedAt], [r].[UpdatedBy], [r].[VehicleId], [r].[ZoneId]
+FROM [Routes] AS [r]
+WHERE [r].[IsDeleted] = CAST(0 AS bit) AND [r].[RouteId] = @__p_0
+2026-10-22 23:30:26.140 +03:00 [INF] HTTP GET /api/routes/1 responded 200 in 18.2419 ms
+2026-10-22 23:30:31.442 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[RouteId], [r].[CourierId], [r].[CreatedAt], [r].[CreatedBy], [r].[IsDeleted], [r].[PlannedDate], [r].[PlannedDistanceKm], [r].[RowVersion], [r].[Status], [r].[UpdatedAt], [r].[UpdatedBy], [r].[VehicleId], [r].[ZoneId]
+FROM [Routes] AS [r]
+WHERE [r].[IsDeleted] = CAST(0 AS bit) AND [r].[RouteId] = @__p_0
+2026-10-22 23:30:31.452 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[@p2='?' (DbType = Int64), @p3='?' (Size = 8) (DbType = Binary), @p0='?' (Size = 20), @p1='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+UPDATE [Routes] SET [Status] = @p0, [UpdatedAt] = @p1
+OUTPUT INSERTED.[RowVersion]
+WHERE [RouteId] = @p2 AND [RowVersion] = @p3;
+2026-10-22 23:30:31.453 +03:00 [INF] HTTP POST /api/routes/1/complete responded 204 in 23.5243 ms
+2026-10-22 23:30:37.217 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[RouteId], [r].[CourierId], [r].[CreatedAt], [r].[CreatedBy], [r].[IsDeleted], [r].[PlannedDate], [r].[PlannedDistanceKm], [r].[RowVersion], [r].[Status], [r].[UpdatedAt], [r].[UpdatedBy], [r].[VehicleId], [r].[ZoneId]
+FROM [Routes] AS [r]
+WHERE [r].[IsDeleted] = CAST(0 AS bit) AND [r].[RouteId] = @__p_0
+2026-10-22 23:30:37.218 +03:00 [ERR] HTTP POST /api/routes/1/complete responded 500 in 7.0256 ms
+Fleet.Domain.Exceptions.DomainException: Only in-progress route can complete
+   at Fleet.Domain.Entities.Route.Complete() in D:\Programming\.net-labs\Services\Fleet\Fleet.Domain\Entities\Route.cs:line 25
+   at Fleet.Bll.Services.RouteService.CompleteAsync(Int64 id, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Bll\Services\RouteService.cs:line 53
+   at Fleet.Api.Controllers.RoutesController.Complete(Int64 id, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Controllers\RoutesController.cs:line 38
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Program.<>c.<<<Main>$>b__0_4>d.MoveNext() in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Program.cs:line 77
+--- End of stack trace from previous location ---
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2026-10-22 23:30:37.230 +03:00 [ERR] An unhandled exception has occurred while executing the request.
+Fleet.Domain.Exceptions.DomainException: Only in-progress route can complete
+   at Fleet.Domain.Entities.Route.Complete() in D:\Programming\.net-labs\Services\Fleet\Fleet.Domain\Entities\Route.cs:line 25
+   at Fleet.Bll.Services.RouteService.CompleteAsync(Int64 id, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Bll\Services\RouteService.cs:line 53
+   at Fleet.Api.Controllers.RoutesController.Complete(Int64 id, CancellationToken ct) in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Controllers\RoutesController.cs:line 38
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Program.<>c.<<<Main>$>b__0_4>d.MoveNext() in D:\Programming\.net-labs\Services\Fleet\Fleet.Api\Program.cs:line 77
+--- End of stack trace from previous location ---
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+2026-10-22 23:30:37.231 +03:00 [WRN] DomainException on /api/routes/1/complete: Only in-progress route can complete
+2026-10-22 23:30:40.814 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [v].[VehicleId], [v].[CapacityKg], [v].[CreatedAt], [v].[CreatedBy], [v].[IsDeleted], [v].[PlateNumber], [v].[RowVersion], [v].[UpdatedAt], [v].[UpdatedBy], [v].[VehicleType], [v].[WarehouseId]
+FROM [Vehicles] AS [v]
+WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[VehicleId] = @__p_0
+2026-10-22 23:30:40.822 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@p3='?' (DbType = Int64), @p0='?' (Precision = 9) (Scale = 2) (DbType = Decimal), @p4='?' (Size = 8) (DbType = Binary), @p1='?' (DbType = DateTime2), @p2='?' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+UPDATE [Vehicles] SET [CapacityKg] = @p0, [UpdatedAt] = @p1, [UpdatedBy] = @p2
+OUTPUT INSERTED.[RowVersion]
+WHERE [VehicleId] = @p3 AND [RowVersion] = @p4;
+2026-10-22 23:30:40.826 +03:00 [INF] HTTP PUT /api/vehicles/1/capacity responded 200 in 24.5365 ms
+2026-10-22 23:30:44.803 +03:00 [INF] HTTP PUT /api/vehicles/1/capacity responded 400 in 8.0807 ms
+2026-10-22 23:30:52.348 +03:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 104.0380 ms
+2026-10-22 23:36:40.273 +03:00 [INF] Executed DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-22 23:36:40.354 +03:00 [INF] Executed DbCommand (22ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-22 23:36:40.366 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-22 23:36:40.378 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-22 23:36:40.423 +03:00 [INF] Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-10-22 23:36:40.691 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[Code] = N'CV-01'
+2026-10-22 23:36:40.763 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Vehicles] AS [v]
+        WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[PlateNumber] = N'AA1234BT') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-22 23:36:40.782 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Couriers] AS [c]
+        WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[Phone] = N'+380991112233') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-22 23:36:49.181 +03:00 [INF] HTTP GET /swagger responded 301 in 21.7681 ms
+2026-10-22 23:36:49.302 +03:00 [INF] HTTP GET /swagger/index.html responded 200 in 88.2219 ms
+2026-10-22 23:36:49.452 +03:00 [INF] HTTP GET /swagger/swagger-ui.css responded 200 in 21.7707 ms
+2026-10-22 23:36:49.463 +03:00 [INF] HTTP GET /swagger/swagger-ui-standalone-preset.js responded 200 in 9.5794 ms
+2026-10-22 23:36:49.548 +03:00 [INF] HTTP GET /swagger/swagger-ui-bundle.js responded 200 in 95.6467 ms
+2026-10-22 23:36:52.308 +03:00 [INF] HTTP GET /swagger/index.html responded 200 in 1.0470 ms
+2026-10-22 23:36:52.592 +03:00 [INF] HTTP GET /swagger/favicon-32x32.png responded 200 in 0.3057 ms
+2026-10-22 23:36:52.755 +03:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 167.9310 ms
+2026-10-22 23:37:16.869 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software AutoMapper. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-10-22 23:37:16.975 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+2026-10-22 23:37:17.138 +03:00 [INF] Executed DbCommand (38ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[CourierId], [t].[CreatedAt], [t].[CreatedBy], [t].[FullName], [t].[IsDeleted], [t].[Phone], [t].[RowVersion], [t].[UpdatedAt], [t].[UpdatedBy], [t].[WarehouseId], [t1].[CourierId], [t1].[ZoneId], [t1].[AssignedAt], [t1].[ZoneId0], [t1].[CreatedAt], [t1].[CreatedBy], [t1].[IsDeleted], [t1].[Name], [t1].[UpdatedAt], [t1].[UpdatedBy], [t1].[CourierId0]
+FROM (
+    SELECT [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+    FROM [Couriers] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [c].[FullName], [c].[CourierId]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_0 ROWS ONLY
+) AS [t]
+LEFT JOIN (
+    SELECT [c0].[CourierId], [c0].[ZoneId], [c0].[AssignedAt], [t2].[ZoneId] AS [ZoneId0], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[IsDeleted], [t2].[Name], [t2].[UpdatedAt], [t2].[UpdatedBy], [t0].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c0]
+    INNER JOIN (
+        SELECT [c1].[CourierId], [c1].[IsDeleted]
+        FROM [Couriers] AS [c1]
+        WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c0].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t2] ON [c0].[ZoneId] = [t2].[ZoneId]
+    WHERE [t0].[IsDeleted] = CAST(0 AS bit) AND [t2].[IsDeleted] = CAST(0 AS bit)
+) AS [t1] ON [t].[CourierId] = [t1].[CourierId]
+ORDER BY [t].[FullName], [t].[CourierId], [t1].[CourierId], [t1].[ZoneId], [t1].[CourierId0]
+2026-10-22 23:37:17.193 +03:00 [INF] HTTP GET /api/couriers responded 200 in 468.9011 ms
+2026-10-22 23:37:36.337 +03:00 [INF] HTTP GET /swagger/index.html responded 200 in 0.4350 ms
+2026-10-22 23:37:36.494 +03:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 20.6379 ms
+2026-10-22 23:37:56.797 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+2026-10-22 23:37:56.861 +03:00 [INF] Executed DbCommand (30ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[CourierId], [t].[CreatedAt], [t].[CreatedBy], [t].[FullName], [t].[IsDeleted], [t].[Phone], [t].[RowVersion], [t].[UpdatedAt], [t].[UpdatedBy], [t].[WarehouseId], [t1].[CourierId], [t1].[ZoneId], [t1].[AssignedAt], [t1].[ZoneId0], [t1].[CreatedAt], [t1].[CreatedBy], [t1].[IsDeleted], [t1].[Name], [t1].[UpdatedAt], [t1].[UpdatedBy], [t1].[CourierId0]
+FROM (
+    SELECT TOP(@__p_0) [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+    FROM [Couriers] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [c].[FullName], [c].[CourierId]
+) AS [t]
+LEFT JOIN (
+    SELECT [c0].[CourierId], [c0].[ZoneId], [c0].[AssignedAt], [t2].[ZoneId] AS [ZoneId0], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[IsDeleted], [t2].[Name], [t2].[UpdatedAt], [t2].[UpdatedBy], [t0].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c0]
+    INNER JOIN (
+        SELECT [c1].[CourierId], [c1].[IsDeleted]
+        FROM [Couriers] AS [c1]
+        WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c0].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t2] ON [c0].[ZoneId] = [t2].[ZoneId]
+    WHERE [t0].[IsDeleted] = CAST(0 AS bit) AND [t2].[IsDeleted] = CAST(0 AS bit)
+) AS [t1] ON [t].[CourierId] = [t1].[CourierId]
+ORDER BY [t].[FullName], [t].[CourierId], [t1].[CourierId], [t1].[ZoneId], [t1].[CourierId0]
+2026-10-22 23:37:56.877 +03:00 [INF] HTTP GET /api/couriers responded 200 in 166.2662 ms
+2026-10-22 23:42:24.556 +03:00 [INF] HTTP POST /api/couriers responded 400 in 84.2956 ms
+2026-10-22 23:42:59.787 +03:00 [INF] Executed DbCommand (27ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t2].[CourierId], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[FullName], [t2].[IsDeleted], [t2].[Phone], [t2].[RowVersion], [t2].[UpdatedAt], [t2].[UpdatedBy], [t2].[WarehouseId], [t2].[CourierId0], [t2].[Category], [t2].[ExpiresOn], [t2].[Number], [t2].[WarehouseId0], [t2].[Address], [t2].[City], [t2].[Code], [t2].[CreatedAt0], [t2].[CreatedBy0], [t2].[IsDeleted0], [t2].[RowVersion0], [t2].[UpdatedAt0], [t2].[UpdatedBy0], [t2].[CourierId00], [t3].[CourierId], [t3].[ZoneId], [t3].[AssignedAt], [t3].[ZoneId0], [t3].[CreatedAt], [t3].[CreatedBy], [t3].[IsDeleted], [t3].[Name], [t3].[UpdatedAt], [t3].[UpdatedBy], [t3].[CourierId0]
+FROM (
+    SELECT TOP(1) [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId], [t0].[CourierId] AS [CourierId0], [t0].[Category], [t0].[ExpiresOn], [t0].[Number], [t1].[WarehouseId] AS [WarehouseId0], [t1].[Address], [t1].[City], [t1].[Code], [t1].[CreatedAt] AS [CreatedAt0], [t1].[CreatedBy] AS [CreatedBy0], [t1].[IsDeleted] AS [IsDeleted0], [t1].[RowVersion] AS [RowVersion0], [t1].[UpdatedAt] AS [UpdatedAt0], [t1].[UpdatedBy] AS [UpdatedBy0], [t0].[CourierId0] AS [CourierId00]
+    FROM [Couriers] AS [c]
+    LEFT JOIN (
+        SELECT [c0].[CourierId], [c0].[Category], [c0].[ExpiresOn], [c0].[Number], [t].[CourierId] AS [CourierId0]
+        FROM [CourierLicenses] AS [c0]
+        INNER JOIN (
+            SELECT [c1].[CourierId], [c1].[IsDeleted]
+            FROM [Couriers] AS [c1]
+            WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+        ) AS [t] ON [c0].[CourierId] = [t].[CourierId]
+        WHERE [t].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+        FROM [Warehouses] AS [w]
+        WHERE [w].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t1] ON [c].[WarehouseId] = [t1].[WarehouseId]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[CourierId] = @__id_0
+) AS [t2]
+LEFT JOIN (
+    SELECT [c2].[CourierId], [c2].[ZoneId], [c2].[AssignedAt], [t5].[ZoneId] AS [ZoneId0], [t5].[CreatedAt], [t5].[CreatedBy], [t5].[IsDeleted], [t5].[Name], [t5].[UpdatedAt], [t5].[UpdatedBy], [t4].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c2]
+    INNER JOIN (
+        SELECT [c3].[CourierId], [c3].[IsDeleted]
+        FROM [Couriers] AS [c3]
+        WHERE [c3].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t4] ON [c2].[CourierId] = [t4].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t5] ON [c2].[ZoneId] = [t5].[ZoneId]
+    WHERE [t4].[IsDeleted] = CAST(0 AS bit) AND [t5].[IsDeleted] = CAST(0 AS bit)
+) AS [t3] ON [t2].[CourierId] = [t3].[CourierId]
+ORDER BY [t2].[CourierId], [t2].[CourierId0], [t2].[CourierId00], [t2].[WarehouseId0], [t3].[CourierId], [t3].[ZoneId], [t3].[CourierId0]
+2026-10-22 23:42:59.939 +03:00 [INF] HTTP GET /api/couriers/1 responded 200 in 224.0122 ms
+2026-10-22 23:43:40.550 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [w].[WarehouseId], [w].[Address], [w].[City], [w].[Code], [w].[CreatedAt], [w].[CreatedBy], [w].[IsDeleted], [w].[RowVersion], [w].[UpdatedAt], [w].[UpdatedBy]
+FROM [Warehouses] AS [w]
+WHERE [w].[IsDeleted] = CAST(0 AS bit) AND [w].[WarehouseId] = @__id_0
+2026-10-22 23:43:40.605 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT [v].[VehicleId], [v].[CapacityKg], [v].[CreatedAt], [v].[CreatedBy], [v].[IsDeleted], [v].[PlateNumber], [v].[RowVersion], [v].[UpdatedAt], [v].[UpdatedBy], [v].[VehicleType], [v].[WarehouseId]
+FROM [Vehicles] AS [v]
+WHERE [v].[IsDeleted] = CAST(0 AS bit) AND [v].[WarehouseId] = @__p_0
+2026-10-22 23:43:40.671 +03:00 [INF] HTTP GET /api/warehouses/1 responded 200 in 143.9086 ms
+2026-10-22 23:49:04.504 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Couriers] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+2026-10-22 23:49:04.553 +03:00 [INF] Executed DbCommand (30ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[CourierId], [t].[CreatedAt], [t].[CreatedBy], [t].[FullName], [t].[IsDeleted], [t].[Phone], [t].[RowVersion], [t].[UpdatedAt], [t].[UpdatedBy], [t].[WarehouseId], [t1].[CourierId], [t1].[ZoneId], [t1].[AssignedAt], [t1].[ZoneId0], [t1].[CreatedAt], [t1].[CreatedBy], [t1].[IsDeleted], [t1].[Name], [t1].[UpdatedAt], [t1].[UpdatedBy], [t1].[CourierId0]
+FROM (
+    SELECT [c].[CourierId], [c].[CreatedAt], [c].[CreatedBy], [c].[FullName], [c].[IsDeleted], [c].[Phone], [c].[RowVersion], [c].[UpdatedAt], [c].[UpdatedBy], [c].[WarehouseId]
+    FROM [Couriers] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [c].[FullName], [c].[CourierId]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_0 ROWS ONLY
+) AS [t]
+LEFT JOIN (
+    SELECT [c0].[CourierId], [c0].[ZoneId], [c0].[AssignedAt], [t2].[ZoneId] AS [ZoneId0], [t2].[CreatedAt], [t2].[CreatedBy], [t2].[IsDeleted], [t2].[Name], [t2].[UpdatedAt], [t2].[UpdatedBy], [t0].[CourierId] AS [CourierId0]
+    FROM [CourierZones] AS [c0]
+    INNER JOIN (
+        SELECT [c1].[CourierId], [c1].[IsDeleted]
+        FROM [Couriers] AS [c1]
+        WHERE [c1].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t0] ON [c0].[CourierId] = [t0].[CourierId]
+    INNER JOIN (
+        SELECT [d].[ZoneId], [d].[CreatedAt], [d].[CreatedBy], [d].[IsDeleted], [d].[Name], [d].[UpdatedAt], [d].[UpdatedBy]
+        FROM [DeliveryZones] AS [d]
+        WHERE [d].[IsDeleted] = CAST(0 AS bit)
+    ) AS [t2] ON [c0].[ZoneId] = [t2].[ZoneId]
+    WHERE [t0].[IsDeleted] = CAST(0 AS bit) AND [t2].[IsDeleted] = CAST(0 AS bit)
+) AS [t1] ON [t].[CourierId] = [t1].[CourierId]
+ORDER BY [t].[FullName], [t].[CourierId], [t1].[CourierId], [t1].[ZoneId], [t1].[CourierId0]
+2026-10-22 23:49:04.569 +03:00 [INF] HTTP GET /api/couriers responded 200 in 73.3130 ms
+2026-10-22 23:59:58.393 +03:00 [INF] HTTP GET /swagger/index.html responded 200 in 0.4851 ms
+2026-10-22 23:59:58.639 +03:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 15.5026 ms

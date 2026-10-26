@@ -10,4 +10,10 @@
     <Project Path="Services/Shipping/Shipping.Domain/Shipping.Domain.csproj" />
     <Project Path="Services/Shipping/Shipping.Tests/Shipping.Tests.csproj" />
   </Folder>
+  <Folder Name="/Services/Fleet/">
+    <Project Path="Services/Fleet/Fleet.Api/Fleet.Api.csproj" />
+    <Project Path="Services/Fleet/Fleet.Bll/Fleet.Bll.csproj" />
+    <Project Path="Services/Fleet/Fleet.Dal/Fleet.Dal.csproj" />
+    <Project Path="Services/Fleet/Fleet.Domain/Fleet.Domain.csproj" />
+  </Folder>
 </Solution>

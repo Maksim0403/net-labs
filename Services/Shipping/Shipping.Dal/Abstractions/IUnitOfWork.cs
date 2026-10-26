@@ -2,11 +2,7 @@ using System.Data;
 
 namespace Shipping.Dal.Abstractions;
 
-/// <summary>
-/// Одне з'єднання і одна транзакція на всю бізнес-операцію (Scoped у DI —
-/// один екземпляр на HTTP-запит). Усі репозитори отримують це саме з'єднання
-/// і поточну транзакцію (Крок B.4).
-/// </summary>
+/// <summary>Контракт Unit of Work з одним з'єднанням і транзакцією.</summary>
 public interface IUnitOfWork : IAsyncDisposable
 {
     ICustomerRepository Customers { get; }
@@ -17,3 +13,4 @@ public interface IUnitOfWork : IAsyncDisposable
     Task CommitAsync(CancellationToken ct = default);
     Task RollbackAsync(CancellationToken ct = default);
 }
+

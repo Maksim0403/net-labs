@@ -8,18 +8,17 @@ using Shipping.Dal.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Крок A: рядок підключення з конфігурації (Aspire підставить його за
-// назвою ресурсу "ShippingDb" автоматично — Platform.AppHost/AppHost.cs).
+// Рядок підключення
 var connectionString = builder.Configuration.GetConnectionString("ShippingDb")
     ?? throw new InvalidOperationException("Connection string 'ShippingDb' is missing");
 
-// Логування — Serilog
+// Логування Serilog
 builder.Host.UseSerilog((ctx, cfg) => cfg
     .ReadFrom.Configuration(ctx.Configuration)
     .Enrich.FromLogContext()
     .WriteTo.Console());
 
-// DI: Unit of Work — Scoped (один екземпляр / одне з'єднання на HTTP-запит)
+// Реєстрація сервісів і Unit of Work
 builder.Services.AddScoped<IUnitOfWork>(_ => new UnitOfWork(connectionString));
 builder.Services.AddScoped<IShipmentService, ShipmentService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
@@ -30,7 +29,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Крок D: централізована обробка помилок -> ProblemDetails (RFC 9457)
+// Централізована обробка помилок (ProblemDetails)
 builder.Services.AddProblemDetails(o => o.CustomizeProblemDetails = ctx =>
     ctx.ProblemDetails.Extensions["traceId"] = ctx.HttpContext.TraceIdentifier);
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
@@ -49,5 +48,5 @@ app.MapControllers();
 
 app.Run();
 
-// для WebApplicationFactory в майбутніх інтеграційних тестах (Крок E)
 public partial class Program { }
+
