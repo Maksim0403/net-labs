@@ -1,4 +1,4 @@
-using Serilog;
+using Platform.ServiceDefaults;
 using Shipping.Api.ErrorHandling;
 using Shipping.Bll.Abstractions;
 using Shipping.Bll.Mapping;
@@ -8,15 +8,11 @@ using Shipping.Dal.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Рядок підключення
+builder.AddServiceDefaults();
+
+// Рядок підключення з Aspire конфігурації
 var connectionString = builder.Configuration.GetConnectionString("ShippingDb")
     ?? throw new InvalidOperationException("Connection string 'ShippingDb' is missing");
-
-// Логування Serilog
-builder.Host.UseSerilog((ctx, cfg) => cfg
-    .ReadFrom.Configuration(ctx.Configuration)
-    .Enrich.FromLogContext()
-    .WriteTo.Console());
 
 // Реєстрація сервісів і Unit of Work
 builder.Services.AddScoped<IUnitOfWork>(_ => new UnitOfWork(connectionString));
@@ -36,6 +32,8 @@ builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 
 var app = builder.Build();
 
+app.MapDefaultEndpoints();
+
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
@@ -49,4 +47,3 @@ app.MapControllers();
 app.Run();
 
 public partial class Program { }
-

@@ -18,34 +18,6 @@ public sealed class ReviewQueries : IReviewQueries
         _context = context;
     }
 
-    private static readonly ProjectionDefinition<Review, ReviewDto> DtoProjection =
-        Builders<Review>.Projection.Expression(r => new ReviewDto
-        {
-            Id = r.Id.ToString(),
-            ShipmentId = r.ShipmentId,
-            CustomerId = r.CustomerId,
-            CourierId = r.CourierId,
-            CourierName = r.CourierName,
-            Type = r.Type,
-            Rating = r.Rating.Value,
-            Text = r.Text,
-            Criteria = r.Criteria != null ? new ReviewCriteriaDto
-            {
-                Speed = r.Criteria.Speed,
-                Politeness = r.Criteria.Politeness,
-                Packaging = r.Criteria.Packaging
-            } : null,
-            Comments = r.Comments.Select(c => new ReviewCommentDto
-            {
-                Author = c.Author,
-                Text = c.Text,
-                CreatedAt = c.CreatedAt
-            }).ToList(),
-            Version = r.Version,
-            CreatedAt = r.CreatedAt,
-            UpdatedAt = r.UpdatedAt
-        });
-
     public async Task<ReviewDto?> GetByIdAsync(string id, CancellationToken ct = default)
     {
         if (!ObjectId.TryParse(id, out var objectId))
@@ -56,9 +28,8 @@ public sealed class ReviewQueries : IReviewQueries
             Builders<Review>.Filter.Eq(r => r.IsDeleted, false)
         );
 
-        return await _context.Reviews.Find(filter)
-            .Project(DtoProjection)
-            .FirstOrDefaultAsync(ct);
+        var review = await _context.Reviews.Find(filter).FirstOrDefaultAsync(ct);
+        return review == null ? null : MapToDto(review);
     }
 
     public async Task<PagedResult<ReviewDto>> GetListAsync(GetReviewsQuery query, CancellationToken ct = default)
@@ -88,15 +59,42 @@ public sealed class ReviewQueries : IReviewQueries
 
         var totalCount = await _context.Reviews.CountDocumentsAsync(combinedFilter, cancellationToken: ct);
 
-        // Пагінація та проєкція безпосередньо в MongoDB через Project, Skip і Limit
-        var items = await _context.Reviews.Find(combinedFilter)
-            .Project(DtoProjection)
+        // Пагінація та сортування на боці MongoDB через SortByDescending, Skip і Limit
+        var reviews = await _context.Reviews.Find(combinedFilter)
             .SortByDescending(r => r.CreatedAt)
             .Skip((query.Page - 1) * query.PageSize)
             .Limit(query.PageSize)
             .ToListAsync(ct);
 
+        var items = reviews.Select(MapToDto).ToList();
+
         return new PagedResult<ReviewDto>(items, query.Page, query.PageSize, totalCount);
     }
-}
 
+    private static ReviewDto MapToDto(Review r) => new()
+    {
+        Id = r.Id.ToString(),
+        ShipmentId = r.ShipmentId,
+        CustomerId = r.CustomerId,
+        CourierId = r.CourierId,
+        CourierName = r.CourierName,
+        Type = r.Type,
+        Rating = r.Rating.Value,
+        Text = r.Text,
+        Criteria = r.Criteria != null ? new ReviewCriteriaDto
+        {
+            Speed = r.Criteria.Speed,
+            Politeness = r.Criteria.Politeness,
+            Packaging = r.Criteria.Packaging
+        } : null,
+        Comments = r.Comments.Select(c => new ReviewCommentDto
+        {
+            Author = c.Author,
+            Text = c.Text,
+            CreatedAt = c.CreatedAt
+        }).ToList(),
+        Version = r.Version,
+        CreatedAt = r.CreatedAt,
+        UpdatedAt = r.UpdatedAt
+    };
+}

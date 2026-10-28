@@ -7,6 +7,7 @@ namespace Fleet.Api.Controllers;
 
 [ApiController]
 [Route("api/routes")]
+[Route("api/fleet/routes")]
 public class RoutesController(IRouteService service) : ControllerBase
 {
     [HttpGet("{id:long}")]

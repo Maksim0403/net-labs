@@ -1,21 +1,14 @@
+using Platform.ServiceDefaults;
 using Reviews.Application;
 using Reviews.Infrastructure;
 using Reviews.Infrastructure.Indices;
 using Reviews.Infrastructure.Seeding;
 using Reviews.WebApi.ErrorHandling;
 using Reviews.WebApi.Mapping;
-using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Налаштування Serilog
-builder.Host.UseSerilog((context, services, configuration) =>
-{
-    configuration
-        .ReadFrom.Configuration(context.Configuration)
-        .Enrich.FromLogContext()
-        .WriteTo.Console();
-});
+builder.AddServiceDefaults();
 
 // Реєстрація шарів Clean Architecture
 builder.Services.AddApplication();
@@ -41,6 +34,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 // Налаштування індексів та сідінг при запуску
 using (var scope = app.Services.CreateScope())
@@ -74,7 +69,6 @@ if (app.Environment.IsDevelopment() || true)
     });
 }
 
-app.UseSerilogRequestLogging();
 app.MapControllers();
 
 app.Run();

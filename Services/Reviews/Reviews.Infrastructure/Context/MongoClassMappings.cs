@@ -50,7 +50,7 @@ public static class MongoClassMappings
                     cm.AutoMap();
                     var ctor = typeof(Rating).GetConstructor(new[] { typeof(int) });
                     if (ctor != null)
-                        cm.MapConstructor(ctor, "value");
+                        cm.MapConstructor(ctor, nameof(Rating.Value));
                 });
             }
 
@@ -62,7 +62,7 @@ public static class MongoClassMappings
                     cm.AutoMap();
                     var ctor = typeof(ReviewComment).GetConstructor(new[] { typeof(string), typeof(string), typeof(DateTime?) });
                     if (ctor != null)
-                        cm.MapConstructor(ctor, "author", "text", "createdAt");
+                        cm.MapConstructor(ctor, nameof(ReviewComment.Author), nameof(ReviewComment.Text), nameof(ReviewComment.CreatedAt));
                 });
             }
 
@@ -74,7 +74,7 @@ public static class MongoClassMappings
                     cm.AutoMap();
                     var ctor = typeof(ReviewCriteria).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) });
                     if (ctor != null)
-                        cm.MapConstructor(ctor, "speed", "politeness", "packaging");
+                        cm.MapConstructor(ctor, nameof(ReviewCriteria.Speed), nameof(ReviewCriteria.Politeness), nameof(ReviewCriteria.Packaging));
                 });
             }
 
@@ -86,7 +86,7 @@ public static class MongoClassMappings
                     cm.AutoMap();
                     var ctor = typeof(DiscussionMessage).GetConstructor(new[] { typeof(string), typeof(string), typeof(DateTime?) });
                     if (ctor != null)
-                        cm.MapConstructor(ctor, "author", "text", "sentAt");
+                        cm.MapConstructor(ctor, nameof(DiscussionMessage.Author), nameof(DiscussionMessage.Text), nameof(DiscussionMessage.SentAt));
                 });
             }
 
@@ -123,4 +123,3 @@ public static class MongoClassMappings
         }
     }
 }
-

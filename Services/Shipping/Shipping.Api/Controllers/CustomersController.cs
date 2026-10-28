@@ -6,6 +6,7 @@ namespace Shipping.Api.Controllers;
 
 [ApiController]
 [Route("api/customers")]
+[Route("api/shipping/customers")]
 public class CustomersController : ControllerBase
 {
     private readonly ICustomerService _customers;

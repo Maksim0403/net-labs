@@ -12,13 +12,16 @@
 
 	<ItemGroup>
 		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0" />
+		<PackageReference Include="Aspire.Hosting.MongoDB" Version="9.0.0" />
 		<PackageReference Include="Aspire.Hosting.SqlServer" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Services\Shipping\Shipping.Api\Shipping.Api.csproj" />
+		<ProjectReference Include="..\Platform.Aggregator\Platform.Aggregator.csproj" />
+		<ProjectReference Include="..\Platform.ApiGateway\Platform.ApiGateway.csproj" />
 		<ProjectReference Include="..\Platform.DatabaseInitializer\Platform.DatabaseInitializer.csproj" />
 		<ProjectReference Include="..\Services\Fleet\Fleet.Api\Fleet.Api.csproj" />
 		<ProjectReference Include="..\Services\Reviews\Reviews.WebApi\Reviews.WebApi.csproj" />
+		<ProjectReference Include="..\Services\Shipping\Shipping.Api\Shipping.Api.csproj" />
 	</ItemGroup>
 </Project>

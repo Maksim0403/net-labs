@@ -7,6 +7,7 @@ namespace Shipping.Api.Controllers;
 /// <summary>Тонкий контролер (Крок D): без SQL і бізнес-правил, лише делегування в BLL.</summary>
 [ApiController]
 [Route("api/shipments")]
+[Route("api/shipping/shipments")]
 public class ShipmentsController : ControllerBase
 {
     private readonly IShipmentService _shipments;
