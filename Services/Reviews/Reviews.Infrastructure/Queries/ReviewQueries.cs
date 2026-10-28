@@ -8,7 +8,7 @@ using Reviews.Infrastructure.Context;
 
 namespace Reviews.Infrastructure.Queries;
 
-/// <summary>Реалізація оптимізованих запитів читання з пагінацією та проєкцією на боці MongoDB.</summary>
+/// <summary>Реалізація оптимізованих запитів читання з пагінацією та проєкцією безпосередньо на боці MongoDB.</summary>
 public sealed class ReviewQueries : IReviewQueries
 {
     private readonly MongoDbContext _context;
@@ -17,6 +17,34 @@ public sealed class ReviewQueries : IReviewQueries
     {
         _context = context;
     }
+
+    private static readonly ProjectionDefinition<Review, ReviewDto> DtoProjection =
+        Builders<Review>.Projection.Expression(r => new ReviewDto
+        {
+            Id = r.Id.ToString(),
+            ShipmentId = r.ShipmentId,
+            CustomerId = r.CustomerId,
+            CourierId = r.CourierId,
+            CourierName = r.CourierName,
+            Type = r.Type,
+            Rating = r.Rating.Value,
+            Text = r.Text,
+            Criteria = r.Criteria != null ? new ReviewCriteriaDto
+            {
+                Speed = r.Criteria.Speed,
+                Politeness = r.Criteria.Politeness,
+                Packaging = r.Criteria.Packaging
+            } : null,
+            Comments = r.Comments.Select(c => new ReviewCommentDto
+            {
+                Author = c.Author,
+                Text = c.Text,
+                CreatedAt = c.CreatedAt
+            }).ToList(),
+            Version = r.Version,
+            CreatedAt = r.CreatedAt,
+            UpdatedAt = r.UpdatedAt
+        });
 
     public async Task<ReviewDto?> GetByIdAsync(string id, CancellationToken ct = default)
     {
@@ -28,11 +56,9 @@ public sealed class ReviewQueries : IReviewQueries
             Builders<Review>.Filter.Eq(r => r.IsDeleted, false)
         );
 
-        var review = await _context.Reviews.Find(filter).FirstOrDefaultAsync(ct);
-        if (review is null)
-            return null;
-
-        return MapToDto(review);
+        return await _context.Reviews.Find(filter)
+            .Project(DtoProjection)
+            .FirstOrDefaultAsync(ct);
     }
 
     public async Task<PagedResult<ReviewDto>> GetListAsync(GetReviewsQuery query, CancellationToken ct = default)
@@ -62,48 +88,15 @@ public sealed class ReviewQueries : IReviewQueries
 
         var totalCount = await _context.Reviews.CountDocumentsAsync(combinedFilter, cancellationToken: ct);
 
-        // Пагінація на рівні MongoDB через Skip / Limit
-        var reviews = await _context.Reviews.Find(combinedFilter)
+        // Пагінація та проєкція безпосередньо в MongoDB через Project, Skip і Limit
+        var items = await _context.Reviews.Find(combinedFilter)
+            .Project(DtoProjection)
             .SortByDescending(r => r.CreatedAt)
             .Skip((query.Page - 1) * query.PageSize)
             .Limit(query.PageSize)
             .ToListAsync(ct);
 
-        var items = reviews.Select(MapToDto).ToList();
-
         return new PagedResult<ReviewDto>(items, query.Page, query.PageSize, totalCount);
-    }
-
-    private static ReviewDto MapToDto(Review review)
-    {
-        return new ReviewDto
-        {
-            Id = review.Id.ToString(),
-            ShipmentId = review.ShipmentId,
-            CustomerId = review.CustomerId,
-            CourierId = review.CourierId,
-            CourierName = review.CourierName,
-            Type = review.Type,
-            Rating = review.Rating.Value,
-            Text = review.Text,
-            Criteria = review.Criteria is not null
-                ? new ReviewCriteriaDto
-                {
-                    Speed = review.Criteria.Speed,
-                    Politeness = review.Criteria.Politeness,
-                    Packaging = review.Criteria.Packaging
-                }
-                : null,
-            Comments = review.Comments.Select(c => new ReviewCommentDto
-            {
-                Author = c.Author,
-                Text = c.Text,
-                CreatedAt = c.CreatedAt
-            }).ToList(),
-            Version = review.Version,
-            CreatedAt = review.CreatedAt,
-            UpdatedAt = review.UpdatedAt
-        };
     }
 }
 

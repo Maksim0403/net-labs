@@ -22,4 +22,3 @@
 		<ProjectReference Include="..\Services\Reviews\Reviews.WebApi\Reviews.WebApi.csproj" />
 	</ItemGroup>
 </Project>
-</Project>

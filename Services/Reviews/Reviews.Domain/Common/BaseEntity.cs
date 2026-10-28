@@ -5,10 +5,24 @@ namespace Reviews.Domain.Common;
 /// <summary>Базова сутність з Id, аудитом і версією для оптимістичної конкурентності.</summary>
 public abstract class BaseEntity
 {
-    public ObjectId Id { get; protected set; }
-    public DateTime CreatedAt { get; protected set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; protected set; }
-    public int Version { get; protected set; } = 1;
+    public ObjectId Id { get; private set; }
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; private set; }
+    public int Version { get; private set; } = 1;
+
+    protected BaseEntity()
+    {
+        Id = ObjectId.GenerateNewId();
+        CreatedAt = DateTime.UtcNow;
+        Version = 1;
+    }
+
+    protected BaseEntity(ObjectId id)
+    {
+        Id = id;
+        CreatedAt = DateTime.UtcNow;
+        Version = 1;
+    }
 
     public void IncrementVersion()
     {
@@ -17,5 +31,6 @@ public abstract class BaseEntity
     }
 
     public void SetVersion(int version) => Version = version;
+    public void SetUpdatedAt(DateTime updatedAt) => UpdatedAt = updatedAt;
 }
 

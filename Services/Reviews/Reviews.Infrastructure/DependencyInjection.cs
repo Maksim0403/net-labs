@@ -30,7 +30,10 @@ public static class DependencyInjection
         });
 
         services.AddScoped<MongoDbContext>();
+        services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
         services.AddScoped<IReviewRepository, ReviewRepository>();
+        services.AddScoped<IIncidentRepository, IncidentRepository>();
+        services.AddScoped<IDiscussionRepository, DiscussionRepository>();
         services.AddScoped<IReviewQueries, ReviewQueries>();
         services.AddScoped<IIndexConfigurator, MongoIndexConfigurator>();
         services.AddScoped<IDataSeeder, MongoDataSeeder>();

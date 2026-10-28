@@ -21,7 +21,7 @@ public sealed class Review : BaseEntity
     public IReadOnlyCollection<ReviewComment> Comments => _comments.AsReadOnly();
     public bool IsDeleted { get; private set; }
 
-    private Review() { }
+    private Review() : base() { }
 
     public Review(
         long shipmentId,
@@ -31,7 +31,7 @@ public sealed class Review : BaseEntity
         string type,
         Rating rating,
         string text,
-        ReviewCriteria? criteria = null)
+        ReviewCriteria? criteria = null) : base()
     {
         if (shipmentId <= 0)
             throw new DomainValidationException("Ідентифікатор відправлення має бути більшим за 0.");
@@ -44,7 +44,6 @@ public sealed class Review : BaseEntity
         if (string.IsNullOrWhiteSpace(type))
             throw new DomainValidationException("Тип відгуку не може бути порожнім.");
 
-        Id = ObjectId.GenerateNewId();
         ShipmentId = shipmentId;
         CustomerId = customerId;
         CourierId = courierId;
@@ -53,8 +52,6 @@ public sealed class Review : BaseEntity
         Rating = rating ?? throw new ArgumentNullException(nameof(rating));
         Text = text?.Trim() ?? string.Empty;
         Criteria = criteria;
-        CreatedAt = DateTime.UtcNow;
-        Version = 1;
         IsDeleted = false;
     }
 
@@ -66,7 +63,7 @@ public sealed class Review : BaseEntity
         Rating = newRating ?? throw new ArgumentNullException(nameof(newRating));
         Text = newText?.Trim() ?? string.Empty;
         Criteria = newCriteria;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt(DateTime.UtcNow);
     }
 
     public void AddComment(string author, string text)
@@ -76,7 +73,7 @@ public sealed class Review : BaseEntity
 
         var comment = new ReviewComment(author, text);
         _comments.Add(comment);
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt(DateTime.UtcNow);
     }
 
     public void Delete()
@@ -85,7 +82,7 @@ public sealed class Review : BaseEntity
             throw new DomainConflictException("Відгук уже позначено як видалений.");
 
         IsDeleted = true;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt(DateTime.UtcNow);
     }
 }
 

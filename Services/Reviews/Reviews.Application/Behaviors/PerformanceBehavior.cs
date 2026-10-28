@@ -4,12 +4,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Reviews.Application.Behaviors;
 
-/// <summary>Поведінка пайплайну для відстеження та логування часу виконання запитів.</summary>
+/// <summary>Поведінка пайплайну для відстеження часу виконання та попередження про повільні запити.</summary>
 public sealed class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
     private readonly Stopwatch _timer = new();
     private readonly ILogger<PerformanceBehavior<TRequest, TResponse>> _logger;
+    private const int SlowRequestThresholdMs = 500;
 
     public PerformanceBehavior(ILogger<PerformanceBehavior<TRequest, TResponse>> logger)
     {
@@ -28,8 +29,15 @@ public sealed class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior
         _timer.Stop();
         var elapsedMilliseconds = _timer.ElapsedMilliseconds;
 
-        var requestName = typeof(TRequest).Name;
-        _logger.LogInformation("Запит {RequestName} тривав {ElapsedMilliseconds}ms", requestName, elapsedMilliseconds);
+        if (elapsedMilliseconds > SlowRequestThresholdMs)
+        {
+            var requestName = typeof(TRequest).Name;
+            _logger.LogWarning(
+                "Повільний обробник запиту: {RequestName} тривав {ElapsedMilliseconds}ms (поріг {Threshold}ms)",
+                requestName,
+                elapsedMilliseconds,
+                SlowRequestThresholdMs);
+        }
 
         return response;
     }

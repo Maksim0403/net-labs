@@ -25,5 +25,8 @@ public class MongoDbContext
 
     public virtual IMongoCollection<Incident> Incidents =>
         _database.GetCollection<Incident>("incidents");
+
+    public virtual IMongoCollection<Discussion> Discussions =>
+        _database.GetCollection<Discussion>("discussions");
 }
 

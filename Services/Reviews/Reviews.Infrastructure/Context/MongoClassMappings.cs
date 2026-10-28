@@ -78,13 +78,24 @@ public static class MongoClassMappings
                 });
             }
 
+            // Мапінг Value Object: DiscussionMessage
+            if (!BsonClassMap.IsClassMapRegistered(typeof(DiscussionMessage)))
+            {
+                BsonClassMap.RegisterClassMap<DiscussionMessage>(cm =>
+                {
+                    cm.AutoMap();
+                    var ctor = typeof(DiscussionMessage).GetConstructor(new[] { typeof(string), typeof(string), typeof(DateTime?) });
+                    if (ctor != null)
+                        cm.MapConstructor(ctor, "author", "text", "sentAt");
+                });
+            }
+
             // Мапінг доменної сутності: Review
             if (!BsonClassMap.IsClassMapRegistered(typeof(Review)))
             {
                 BsonClassMap.RegisterClassMap<Review>(cm =>
                 {
                     cm.AutoMap();
-                    // Мапінг приватного поля вкладеної колекції коментарів
                     cm.MapField("_comments").SetElementName("comments");
                 });
             }
@@ -95,6 +106,16 @@ public static class MongoClassMappings
                 BsonClassMap.RegisterClassMap<Incident>(cm =>
                 {
                     cm.AutoMap();
+                });
+            }
+
+            // Мапінг доменної сутності: Discussion
+            if (!BsonClassMap.IsClassMapRegistered(typeof(Discussion)))
+            {
+                BsonClassMap.RegisterClassMap<Discussion>(cm =>
+                {
+                    cm.AutoMap();
+                    cm.MapField("_messages").SetElementName("messages");
                 });
             }
 

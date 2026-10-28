@@ -23,7 +23,7 @@ public sealed class ReviewsController : ControllerBase
         _mapper = mapper;
     }
 
-    /// <summary>Створення нового відгуку.</summary>
+    /// <summary>Створення нового відгуку (HTTP 201 Created з Location-заголовком).</summary>
     [HttpPost]
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -35,10 +35,14 @@ public sealed class ReviewsController : ControllerBase
         var command = _mapper.Map<CreateReviewCommand>(request);
         var result = await _sender.Send(command, ct);
 
+        // Передаємо рядковий ObjectId у заголовку Location
+        var locationUri = Url.Action(nameof(GetById), new { id = result.Id }) ?? $"/api/reviews/{result.Id}";
+        Response.Headers.Location = locationUri;
+
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    /// <summary>Отримання відгуку за його ідентифікатором.</summary>
+    /// <summary>Отримання відгуку за його ідентифікатором (HTTP 200 OK або 404 Not Found).</summary>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -47,17 +51,19 @@ public sealed class ReviewsController : ControllerBase
     {
         var result = await _sender.Send(new GetReviewByIdQuery(id), ct);
         if (result is null)
+        {
             return NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
-                Title = "Не знайдено",
+                Title = "Ресурс не знайдено",
                 Detail = $"Відгук з id '{id}' не знайдено."
             });
+        }
 
         return Ok(result);
     }
 
-    /// <summary>Отримання пагінованого списку відгуків з фільтрацією.</summary>
+    /// <summary>Отримання пагінованого списку відгуків з фільтрацією (HTTP 200 OK).</summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<ReviewDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -76,7 +82,7 @@ public sealed class ReviewsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>Оновлення відгуку (з перевіркою версії для оптимістичної конкурентності).</summary>
+    /// <summary>Оновлення відгуку за ідентифікатором (HTTP 204 No Content або 400/404/409).</summary>
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -87,12 +93,12 @@ public sealed class ReviewsController : ControllerBase
         [FromBody] UpdateReviewRequest request,
         CancellationToken ct)
     {
-        var command = new UpdateReviewCommand(id, request.Rating, request.Text, request.Criteria, request.Version);
+        var command = _mapper.Map<UpdateReviewCommand>(request) with { Id = id };
         await _sender.Send(command, ct);
         return NoContent();
     }
 
-    /// <summary>Видалення відгуку (з перевіркою версії для оптимістичної конкурентності).</summary>
+    /// <summary>Видалення відгуку за ідентифікатором (HTTP 204 No Content або 400/404/409).</summary>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -108,7 +114,7 @@ public sealed class ReviewsController : ControllerBase
         return NoContent();
     }
 
-    /// <summary>Додавання коментаря до відгуку.</summary>
+    /// <summary>Додавання коментаря до відгуку (HTTP 200 OK або 400/404/409).</summary>
     [HttpPost("{id}/comments")]
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -119,7 +125,7 @@ public sealed class ReviewsController : ControllerBase
         [FromBody] AddCommentRequest request,
         CancellationToken ct)
     {
-        var command = new AddCommentCommand(id, request.Author, request.Text, request.Version);
+        var command = _mapper.Map<AddCommentCommand>(request) with { ReviewId = id };
         var result = await _sender.Send(command, ct);
         return Ok(result);
     }

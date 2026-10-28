@@ -13,9 +13,9 @@ public sealed class Incident : BaseEntity
     public string Status { get; private set; } = "open";
     public string Description { get; private set; } = string.Empty;
 
-    private Incident() { }
+    private Incident() : base() { }
 
-    public Incident(long shipmentId, string type, string severity, string description)
+    public Incident(long shipmentId, string type, string severity, string description) : base()
     {
         if (shipmentId <= 0)
             throw new DomainValidationException("Ідентифікатор відправлення має бути більшим за 0.");
@@ -24,14 +24,11 @@ public sealed class Incident : BaseEntity
         if (string.IsNullOrWhiteSpace(severity))
             throw new DomainValidationException("Рівень критичності є обов'язковим.");
 
-        Id = ObjectId.GenerateNewId();
         ShipmentId = shipmentId;
         Type = type.Trim();
         Severity = severity.Trim();
         Description = description?.Trim() ?? string.Empty;
         Status = "open";
-        CreatedAt = DateTime.UtcNow;
-        Version = 1;
     }
 
     public void Resolve()
@@ -40,7 +37,7 @@ public sealed class Incident : BaseEntity
             throw new DomainConflictException("Інцидент вже закритий.");
 
         Status = "closed";
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt(DateTime.UtcNow);
     }
 
     public void UpdateSeverity(string newSeverity)
@@ -49,7 +46,7 @@ public sealed class Incident : BaseEntity
             throw new DomainValidationException("Рівень критичності не може бути порожнім.");
 
         Severity = newSeverity.Trim();
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedAt(DateTime.UtcNow);
     }
 }
 
