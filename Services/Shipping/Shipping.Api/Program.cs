@@ -1,5 +1,6 @@
 using Platform.ServiceDefaults;
 using Shipping.Api.ErrorHandling;
+using Shipping.Api.Grpc;
 using Shipping.Bll.Abstractions;
 using Shipping.Bll.Mapping;
 using Shipping.Bll.Services;
@@ -9,6 +10,9 @@ using Shipping.Dal.Abstractions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+// gRPC-сервер з серверним interceptor для логування (Частина 4.3, 6.2)
+builder.Services.AddGrpc(o => o.Interceptors.Add<LoggingInterceptor>());
 
 // Рядок підключення з Aspire конфігурації
 var connectionString = builder.Configuration.GetConnectionString("ShippingDb")
@@ -43,6 +47,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
+app.MapGrpcService<ShippingGrpcService>();
 
 app.Run();
 

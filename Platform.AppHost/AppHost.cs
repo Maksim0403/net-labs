@@ -20,6 +20,9 @@ var mongoPassword = builder.AddParameter(
 var mongodb = builder.AddMongoDB("mongodb", password: mongoPassword).WithDataVolume();
 var trackingDb = mongodb.AddDatabase("trackingdb", "trackingdb");
 
+// Redis для розподіленого кешування (Частина 1.2)
+var redis = builder.AddRedis("redis").WithDataVolume();
+
 var databaseInitializer = builder
     .AddProject<Projects.Platform_DatabaseInitializer>("shipping-db-init")
     .WithReference(shippingDb)
@@ -34,6 +37,8 @@ var shippingApi = builder.AddProject<Projects.Shipping_Api>("shipping-api")
 var fleetApi = builder.AddProject<Projects.Fleet_Api>("fleet-api")
     .WithReference(fleetDb)
     .WaitFor(sql)
+    .WithReference(redis)
+    .WaitFor(redis)
     .WithExternalHttpEndpoints();
 
 var reviewsWebApi = builder.AddProject<Projects.Reviews_WebApi>("reviews-webapi")
@@ -45,9 +50,11 @@ var aggregator = builder.AddProject<Projects.Platform_Aggregator>("aggregator")
     .WithReference(shippingApi)
     .WithReference(fleetApi)
     .WithReference(reviewsWebApi)
+    .WithReference(redis)
     .WaitFor(shippingApi)
     .WaitFor(fleetApi)
     .WaitFor(reviewsWebApi)
+    .WaitFor(redis)
     .WithExternalHttpEndpoints();
 
 var gateway = builder.AddProject<Projects.Platform_ApiGateway>("gateway")

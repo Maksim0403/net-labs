@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option csharp_namespace = "Shipping.Grpc";
+package shipping;
+
+// Читання даних відправлень для внутрішніх сервісів
+service ShippingService {
+  rpc GetShipment (GetShipmentRequest) returns (ShipmentReply);
+}
+
+message GetShipmentRequest {
+  int64 id = 1;
+}
+
+message ShipmentReply {
+  int64 id = 1;
+  int64 customer_id = 2;
+  string tracking_number = 3;
+  string status = 4;
+  double total_price = 5;
+  string sender_address = 6;
+  string recipient_name = 7;
+  string recipient_phone = 8;
+  string recipient_address = 9;
+  double weight_kg = 10;
+  double declared_value = 11;
+  string created_at = 12;
+  string confirmed_at = 13;
+}
+

@@ -8,6 +8,19 @@
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.66.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.27.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.66.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\Services\Fleet\Fleet.Api\Protos\fleet.proto" GrpcServices="Client" Link="Protos\fleet.proto" />
+    <Protobuf Include="..\Services\Shipping\Shipping.Api\Protos\shipping.proto" GrpcServices="Client" Link="Protos\shipping.proto" />
+    <Protobuf Include="..\Services\Reviews\Reviews.WebApi\Protos\reviews.proto" GrpcServices="Client" Link="Protos\reviews.proto" />
   </ItemGroup>
 
   <ItemGroup>

@@ -46,6 +46,15 @@ public class AssignZoneDto
     public long ZoneId { get; set; }
 }
 
+public class UpdateCourierDto
+{
+    [Required, StringLength(150, MinimumLength = 2)]
+    public string FullName { get; set; } = "";
+
+    [Required, StringLength(20)]
+    public string Phone { get; set; } = "";
+}
+
 // ---------- Warehouse ----------
 public class WarehouseDto
 {

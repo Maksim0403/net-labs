@@ -11,6 +11,11 @@
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.66.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\shipping.proto" GrpcServices="Server" />
   </ItemGroup>
 
   <ItemGroup>

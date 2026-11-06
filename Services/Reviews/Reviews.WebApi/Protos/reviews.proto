@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "Reviews.Grpc";
+package reviews;
+
+// Читання відгуків для внутрішніх сервісів
+service ReviewsService {
+  rpc GetReviewsByShipment (GetReviewsByShipmentRequest) returns (ReviewsReply);
+}
+
+message GetReviewsByShipmentRequest {
+  int64 shipment_id = 1;
+}
+
+message ReviewItemReply {
+  string id = 1;
+  int64 shipment_id = 2;
+  int64 customer_id = 3;
+  int32 rating = 4;
+  string text = 5;
+  string created_at = 6;
+}
+
+message ReviewsReply {
+  repeated ReviewItemReply items = 1;
+  int64 total_count = 2;
+}
+

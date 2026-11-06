@@ -4,11 +4,15 @@ using Reviews.Infrastructure;
 using Reviews.Infrastructure.Indices;
 using Reviews.Infrastructure.Seeding;
 using Reviews.WebApi.ErrorHandling;
+using Reviews.WebApi.Grpc;
 using Reviews.WebApi.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+// gRPC-сервер з серверним interceptor для логування (Частина 4.3, 6.2)
+builder.Services.AddGrpc(o => o.Interceptors.Add<LoggingInterceptor>());
 
 // Реєстрація шарів Clean Architecture
 builder.Services.AddApplication();
@@ -70,5 +74,6 @@ if (app.Environment.IsDevelopment() || true)
 }
 
 app.MapControllers();
+app.MapGrpcService<ReviewsGrpcService>();
 
 app.Run();

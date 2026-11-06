@@ -43,4 +43,11 @@ public class CouriersController(ICourierService service) : ControllerBase
         await service.AssignToZoneAsync(id, input.ZoneId, ct);
         return NoContent();
     }
+
+    [HttpPut("{id:long}")]
+    public async Task<ActionResult<CourierDto>> Update(long id, UpdateCourierDto input, CancellationToken ct)
+    {
+        var updated = await service.UpdateAsync(id, input, ct);
+        return Ok(updated);
+    }
 }

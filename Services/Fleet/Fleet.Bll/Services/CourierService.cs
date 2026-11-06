@@ -1,4 +1,5 @@
 using AutoMapper;
+using Fleet.Bll.Caching;
 using Fleet.Bll.Dto;
 using Fleet.Bll.Specifications;
 using Fleet.Dal;
@@ -12,18 +13,30 @@ public interface ICourierService
     Task<CourierDetailsDto> GetByIdAsync(long id, CancellationToken ct = default);
     Task<PagedResult<CourierDto>> GetListAsync(CourierQuery query, CancellationToken ct = default);
     Task<CourierDto> CreateAsync(CreateCourierDto input, CancellationToken ct = default);
+    Task<CourierDto> UpdateAsync(long id, UpdateCourierDto input, CancellationToken ct = default);
     Task AssignToZoneAsync(long courierId, long zoneId, CancellationToken ct = default);
     Task<IReadOnlyList<CourierDto>> GetAssignedToZoneSinceAsync(string zoneName, DateTime since, CancellationToken ct = default);
 }
 
-public sealed class CourierService(IUnitOfWork uow, IMapper mapper) : ICourierService
+public sealed class CourierService(IUnitOfWork uow, IMapper mapper, ITwoLevelCache cache) : ICourierService
 {
-    // Eager Loading: один запит з усім пов'язаним
+    // Cache-aside: перевірка кешу -> БД при промаху -> запис у кеш
     public async Task<CourierDetailsDto> GetByIdAsync(long id, CancellationToken ct = default)
     {
-        var courier = await uow.Couriers.GetWithDetailsAsync(id, ct)
-            ?? throw new EntityNotFoundException($"Courier {id} not found");
-        return mapper.Map<CourierDetailsDto>(courier);
+        var key = $"fleet:courier:{id}";
+        var cached = await cache.GetOrCreateAsync(
+            key,
+            async () =>
+            {
+                var courier = await uow.Couriers.GetWithDetailsAsync(id, ct)
+                    ?? throw new EntityNotFoundException($"Courier {id} not found");
+                return mapper.Map<CourierDetailsDto>(courier);
+            },
+            l1Ttl: TimeSpan.FromMinutes(2),
+            l2Ttl: TimeSpan.FromMinutes(10),
+            ct: ct);
+
+        return cached ?? throw new EntityNotFoundException($"Courier {id} not found");
     }
 
     // Фільтрація, сортування й Skip/Take виконуються в SQL через специфікації
@@ -50,6 +63,24 @@ public sealed class CourierService(IUnitOfWork uow, IMapper mapper) : ICourierSe
         var courier = new Courier(input.WarehouseId, input.FullName.Trim(), input.Phone.Trim());
         await uow.Couriers.AddAsync(courier, ct);
         await uow.SaveChangesAsync(ct);   // один виклик наприкінці операції
+
+        // Інвалідація кешу одразу після запису
+        await cache.RemoveAsync($"fleet:courier:{courier.Id}", "CourierCreated", ct);
+
+        return mapper.Map<CourierDto>(courier);
+    }
+
+    public async Task<CourierDto> UpdateAsync(long id, UpdateCourierDto input, CancellationToken ct = default)
+    {
+        var courier = await uow.Couriers.GetByIdAsync(id, ct)
+            ?? throw new EntityNotFoundException($"Courier {id} not found");
+
+        courier.Update(input.FullName.Trim(), input.Phone.Trim());
+        await uow.SaveChangesAsync(ct);
+
+        // Інвалідація кешу одразу після запису
+        await cache.RemoveAsync($"fleet:courier:{id}", "CourierUpdated", ct);
+
         return mapper.Map<CourierDto>(courier);
     }
 
@@ -62,6 +93,9 @@ public sealed class CourierService(IUnitOfWork uow, IMapper mapper) : ICourierSe
 
         courier.AssignToZone(zone);       // DomainException -> 409, якщо вже призначений
         await uow.SaveChangesAsync(ct);
+
+        // Інвалідація кешу одразу після запису
+        await cache.RemoveAsync($"fleet:courier:{courierId}", "CourierAssignedToZone", ct);
     }
 
     // LINQ to Entities для M:N через проміжну сутність

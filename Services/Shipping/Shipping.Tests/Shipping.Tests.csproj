@@ -23,6 +23,8 @@
 	<ProjectReference Include="..\Shipping.Bll\Shipping.Bll.csproj" />
 	<ProjectReference Include="..\Shipping.Dal\Shipping.Dal.csproj" />
 	<ProjectReference Include="..\Shipping.Domain\Shipping.Domain.csproj" />
+	<ProjectReference Include="..\..\Fleet\Fleet.Api\Fleet.Api.csproj" />
+	<ProjectReference Include="..\..\Fleet\Fleet.Bll\Fleet.Bll.csproj" />
   </ItemGroup>
 
 </Project>
