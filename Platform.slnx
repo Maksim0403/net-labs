@@ -3,6 +3,11 @@
     <Project Path="Platform.AppHost/Platform.AppHost.csproj" />
     <Project Path="Platform.DatabaseInitializer/Platform.DatabaseInitializer.csproj" />
   </Folder>
+  <Folder Name="/Platform/">
+    <Project Path="Platform.ServiceDefaults/Platform.ServiceDefaults.csproj" />
+    <Project Path="Platform.ApiGateway/Platform.ApiGateway.csproj" />
+    <Project Path="Platform.Aggregator/Platform.Aggregator.csproj" />
+  </Folder>
   <Folder Name="/Services/Shipping/">
     <Project Path="Services/Shipping/Shipping.Api/Shipping.Api.csproj" />
     <Project Path="Services/Shipping/Shipping.Bll/Shipping.Bll.csproj" />
@@ -23,4 +28,3 @@
     <Project Path="Services/Reviews/Reviews.WebApi/Reviews.WebApi.csproj" />
   </Folder>
 </Solution>
-

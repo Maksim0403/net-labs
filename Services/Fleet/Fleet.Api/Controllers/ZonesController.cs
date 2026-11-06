@@ -6,6 +6,7 @@ namespace Fleet.Api.Controllers;
 
 [ApiController]
 [Route("api/zones")]
+[Route("api/fleet/zones")]
 public class ZonesController(ICourierService couriers) : ControllerBase
 {
     /// <summary>Кур'єри, призначені в зону не раніше дати since (за замовчуванням останні 30 днів). M:N через проміжну сутність.</summary>

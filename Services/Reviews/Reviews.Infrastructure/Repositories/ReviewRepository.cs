@@ -83,14 +83,19 @@ public sealed class ReviewRepository : MongoRepository<Review>, IReviewRepositor
         return await Collection.Find(filter).AnyAsync(ct);
     }
 
-    /// <summary>Читання списку із проєкцією безпосередньо в MongoDB одразу в DTO.</summary>
+    /// <summary>Читання списку із проєкцією в DTO.</summary>
     public async Task<IReadOnlyList<ReviewDto>> GetProjectedListAsync(
         FilterDefinition<Review> filter,
         int skip,
         int limit,
         CancellationToken ct = default)
     {
-        var projection = Builders<Review>.Projection.Expression(r => new ReviewDto
+        var reviews = await Collection.Find(filter)
+            .Skip(skip)
+            .Limit(limit)
+            .ToListAsync(ct);
+
+        return reviews.Select(r => new ReviewDto
         {
             Id = r.Id.ToString(),
             ShipmentId = r.ShipmentId,
@@ -115,13 +120,6 @@ public sealed class ReviewRepository : MongoRepository<Review>, IReviewRepositor
             Version = r.Version,
             CreatedAt = r.CreatedAt,
             UpdatedAt = r.UpdatedAt
-        });
-
-        return await Collection.Find(filter)
-            .Project(projection)
-            .Skip(skip)
-            .Limit(limit)
-            .ToListAsync(ct);
+        }).ToList();
     }
 }
-

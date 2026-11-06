@@ -7,6 +7,7 @@ namespace Fleet.Api.Controllers;
 
 [ApiController]
 [Route("api/couriers")]
+[Route("api/fleet/couriers")]
 public class CouriersController(ICourierService service) : ControllerBase
 {
     /// <summary>Список з пагінацією, фільтрами (search, warehouseId, zoneName) і сортуванням (sortBy, sortDir).</summary>

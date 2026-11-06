@@ -1,54 +1,62 @@
-using Microsoft.Extensions.Configuration;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
-var useLocalSqlServer = builder.Configuration.GetValue<bool>("UseLocalSqlServer");
+var password = builder.AddParameter(
+    "sql-password",
+    builder.Configuration["Parameters:sql-password"] ?? "Your_Strong_Password123!",
+    publishValueAsDefault: false,
+    secret: true);
 
-if (useLocalSqlServer)
-{
-    var shippingDb = builder.AddConnectionString("ShippingDb");
+var sql = builder.AddSqlServer("sql", password).WithDataVolume();
 
-    builder.AddProject<Projects.Shipping_Api>("shipping-api")
-        .WithReference(shippingDb)
-        .WithExternalHttpEndpoints();
+var shippingDb = sql.AddDatabase("ShippingDb", "ShippingDb");
+var fleetDb = sql.AddDatabase("FleetDb", "FleetDb");
 
-    var fleetDb = builder.AddConnectionString("FleetDb");
+var mongoPassword = builder.AddParameter(
+    "mongo-password",
+    builder.Configuration["Parameters:mongo-password"] ?? "Mongo_Strong_Password123!",
+    publishValueAsDefault: false,
+    secret: true);
 
-    builder.AddProject<Projects.Fleet_Api>("fleet-api")
-        .WithReference(fleetDb)
-        .WithExternalHttpEndpoints();
-}
-else
-{
-    var password = builder.AddParameter(
-        "sql-password",
-        builder.Configuration["Parameters:sql-password"]!,
-        publishValueAsDefault: false,
-        secret: true);
+var mongodb = builder.AddMongoDB("mongodb", password: mongoPassword).WithDataVolume();
+var trackingDb = mongodb.AddDatabase("trackingdb", "trackingdb");
 
-    var sql = builder.AddSqlServer("sql", password).WithDataVolume();
+var databaseInitializer = builder
+    .AddProject<Projects.Platform_DatabaseInitializer>("shipping-db-init")
+    .WithReference(shippingDb)
+    .WaitFor(sql);
 
-    var shippingDb = sql.AddDatabase("ShippingDb", "ShippingDb");
-    var fleetDb = sql.AddDatabase("FleetDb", "FleetDb");
+var shippingApi = builder.AddProject<Projects.Shipping_Api>("shipping-api")
+    .WithReference(shippingDb)
+    .WaitForCompletion(databaseInitializer)
+    .WaitFor(sql)
+    .WithExternalHttpEndpoints();
 
-    var databaseInitializer = builder
-        .AddProject<Projects.Platform_DatabaseInitializer>("shipping-db-init")
-        .WithReference(shippingDb)
-        .WaitFor(sql);
+var fleetApi = builder.AddProject<Projects.Fleet_Api>("fleet-api")
+    .WithReference(fleetDb)
+    .WaitFor(sql)
+    .WithExternalHttpEndpoints();
 
-    builder.AddProject<Projects.Shipping_Api>("shipping-api")
-        .WithReference(shippingDb)
-        .WaitForCompletion(databaseInitializer)
-        .WithExternalHttpEndpoints();
+var reviewsWebApi = builder.AddProject<Projects.Reviews_WebApi>("reviews-webapi")
+    .WithReference(trackingDb)
+    .WaitFor(mongodb)
+    .WithExternalHttpEndpoints();
 
-    builder.AddProject<Projects.Fleet_Api>("fleet-api")
-        .WithReference(fleetDb)
-        .WaitFor(sql)
-        .WithExternalHttpEndpoints();
-}
+var aggregator = builder.AddProject<Projects.Platform_Aggregator>("aggregator")
+    .WithReference(shippingApi)
+    .WithReference(fleetApi)
+    .WithReference(reviewsWebApi)
+    .WaitFor(shippingApi)
+    .WaitFor(fleetApi)
+    .WaitFor(reviewsWebApi)
+    .WithExternalHttpEndpoints();
 
-builder.AddProject<Projects.Reviews_WebApi>("reviews-webapi")
+var gateway = builder.AddProject<Projects.Platform_ApiGateway>("gateway")
+    .WithReference(shippingApi)
+    .WithReference(fleetApi)
+    .WithReference(reviewsWebApi)
+    .WithReference(aggregator)
+    .WaitFor(aggregator)
+    .WithHttpEndpoint(port: 5000, name: "http")
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();
-

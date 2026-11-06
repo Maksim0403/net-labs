@@ -7,6 +7,7 @@ namespace Fleet.Api.Controllers;
 
 [ApiController]
 [Route("api/warehouses")]
+[Route("api/fleet/warehouses")]
 public class WarehousesController(IWarehouseService service) : ControllerBase
 {
     [HttpGet("{id:long}")]

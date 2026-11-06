@@ -7,18 +7,11 @@ using Fleet.Dal.Repositories;
 using Fleet.Dal.Seeding;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
-using Serilog.Context;
-using Serilog.Events;
+using Platform.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serilog зі структурованими властивостями та логуванням SQL
-builder.Host.UseSerilog((ctx, cfg) => cfg
-    .ReadFrom.Configuration(ctx.Configuration)
-    .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Information)
-    .Enrich.FromLogContext()
-    .WriteTo.Console());
+builder.AddServiceDefaults();
 
 var connectionString = builder.Configuration.GetConnectionString("FleetDb")
     ?? throw new InvalidOperationException("Connection string 'FleetDb' is missing");
@@ -64,19 +57,9 @@ await using (var scope = app.Services.CreateAsyncScope())
     }
 }
 
-app.UseExceptionHandler();
-app.UseSerilogRequestLogging();
+app.MapDefaultEndpoints();
 
-app.Use(async (context, next) =>
-{
-    var correlationId = context.Request.Headers["X-Correlation-ID"].FirstOrDefault()
-                        ?? context.TraceIdentifier;
-    using (LogContext.PushProperty("CorrelationId", correlationId))
-    using (LogContext.PushProperty("RequestPath", context.Request.Path))
-    {
-        await next();
-    }
-});
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
@@ -89,4 +72,3 @@ app.MapControllers();
 app.Run();
 
 public partial class Program { }
-

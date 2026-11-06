@@ -301,3 +301,303 @@ curl -i -X POST http://localhost:5080/api/routes/1/complete
 curl -i -X PUT http://localhost:5080/api/vehicles/1/capacity -H "Content-Type: application/json" \
   -d '{"capacityKg":1200.0}'
 ```
+
+---
+
+## Лаб. 04 — Reviews.WebApi: Clean Architecture на MongoDB та CQRS (MediatR)
+
+### Структура рішення
+
+```
+Services/Reviews/
+├── Reviews.Domain/          # Сутності (Review, Incident, Discussion), Value Objects (Rating, ReviewCriteria, ReviewComment), доменні винятки
+├── Reviews.Application/     # CQRS Commands/Queries, MediatR Behaviors (Validation, Logging, Performance), DTO, FluentValidation
+├── Reviews.Infrastructure/  # MongoDbContext, MongoClassMappings, Репозиторії (MongoRepository, ReviewRepository), ReviewQueries, Seeding, Індекси
+└── Reviews.WebApi/          # Контролери (ReviewsController), ErrorHandling (ProblemDetails), Mapping (AutoMapper), Program.cs
+```
+
+Залежності відповідають канонічній **Clean Architecture**:
+`Domain` (чистий C# без зовнішніх залежностей) ← `Application` (бізнес-логіка, CQRS) ← `Infrastructure` (MongoDB.Driver) & `WebApi` (презентаційний шар).
+
+### Що реалізовано
+
+- **Доменний шар (Domain):**
+  - Агрегат-корінь `Review` з інкапсульованими методами (`UpdateDetails`, `AddComment`, `Delete`) та приватними сеттерами.
+  - Незмінні Value Objects: `Rating` (1..5), `ReviewCriteria` (швидкість, ввічливість, пакування), `ReviewComment`, `DiscussionMessage`.
+  - Сутності `Incident` та `Discussion` для відстеження проблем доставки.
+  - Доменні винятки: `DomainValidationException`, `DomainConflictException`, `ReviewNotFoundException`, `ConcurrencyException`.
+- **Шар застосунку (Application & CQRS):**
+  - Розділення операцій через **MediatR**: команди (`CreateReviewCommand`, `UpdateReviewCommand`, `DeleteReviewCommand`, `AddCommentCommand`) та запити (`GetReviewByIdQuery`, `GetReviewsQuery`).
+  - **MediatR Pipeline Behaviors**:
+    - `ValidationBehavior` — автоматична валідація запитів через **FluentValidation**.
+    - `LoggingBehavior` — структуроване логування початку та завершення виконання команд і запитів.
+    - `PerformanceBehavior` — фіксація запитів із тривалістю понад 500 мс.
+- **Шар інфраструктури (Infrastructure & MongoDB):**
+  - Офіційний `MongoDB.Driver` без прив'язки доменних класів до BSON-атрибутів: конфігурація винесена в `MongoClassMappings` (`BsonClassMap`, конвенція `camelCase`).
+  - Оптимістичне блокування (Concurrency Control) за допомогою поля `Version` у `BaseEntity`.
+  - Спеціалізований сервіс швидкого читання `IReviewQueries` / `ReviewQueries` з пагінацією (`Skip`/`Limit`), сортуванням та фільтрацією за `courierId`, `customerId`, `shipmentId`, `minRating`, `searchText`.
+  - Автоматичне створення індексів (`MongoIndexConfigurator`): текстовий індекс за описом і коментарями, складені індекси для швидкої фільтрації.
+  - Ідемпотентний сідер початкових даних (`MongoDataSeeder`).
+- **Презентаційний шар (WebApi):**
+  - RESTful API контролер `ReviewsController` з поверненням коректних статус-кодів (201 Created з Location-заголовком, 200 OK, 204 NoContent).
+  - Централізована обробка помилок через `GlobalExceptionHandler` (`IExceptionHandler`) у стандарті RFC 7807 (`ProblemDetails`, `ValidationProblemDetails`).
+
+### Запуск
+
+```bash
+# Окремий запуск Reviews.WebApi (порт за замовчуванням: http://localhost:5030)
+dotnet run --project Services/Reviews/Reviews.WebApi
+
+# Або у складі платформи через Aspire
+dotnet run --project Platform.AppHost
+```
+
+Swagger UI доступний за адресою: `http://localhost:5030/swagger`
+
+### Приклади запитів (порт 5030 або через Gateway на 5000)
+
+```bash
+# 1. Отримання списку відгуків з пагінацією та фільтрацією
+curl "http://localhost:5000/api/reviews?shipmentId=1&page=1&pageSize=10"
+
+# 2. Отримання відгуку за Id
+curl http://localhost:5000/api/reviews/6620f123456789abcdef0001
+
+# 3. Створення нового відгуку (201 Created + Location)
+curl -i -X POST http://localhost:5000/api/reviews \
+  -H "Content-Type: application/json" \
+  -d '{
+    "shipmentId": 1,
+    "customerId": 1,
+    "courierId": 1,
+    "courierName": "Андрій Мельник",
+    "type": "rating",
+    "rating": 5,
+    "text": "Доставка вчасно, кур’єр дуже ввічливий",
+    "criteria": { "speed": 5, "politeness": 5, "packaging": 4 }
+  }'
+
+# 4. Додавання коментаря до відгуку (200 OK)
+curl -i -X POST http://localhost:5000/api/reviews/6620f123456789abcdef0001/comments \
+  -H "Content-Type: application/json" \
+  -d '{
+    "author": "Менеджер",
+    "text": "Дякуємо за ваш відгук!"
+  }'
+
+# 5. Оновлення відгуку з контролем версії (204 No Content)
+curl -i -X PUT http://localhost:5000/api/reviews/6620f123456789abcdef0001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "version": 1,
+    "rating": 4,
+    "text": "Оновлений текст відгуку"
+  }'
+
+# 6. Видалення відгуку (м’яке видалення, 204 No Content)
+curl -i -X DELETE "http://localhost:5000/api/reviews/6620f123456789abcdef0001?version=1"
+```
+
+---
+
+## Лаб. 05 — Мікросервісна платформа на .NET Aspire, YARP, OpenTelemetry та Aggregator
+
+### 1. Призначення платформи та опис мікросервісів
+
+Платформа забезпечує повний життєвий цикл кур'єрської доставки та логістики за розподіленою мікросервісною архітектурою, оркестрованою за допомогою **.NET Aspire**:
+
+1. **Shipping Service (`Services/Shipping/Shipping.Api`)**:
+   - Технологічний стек: **ADO.NET + Dapper**, база даних **SQL Server (`ShippingDb`)**.
+   - Домен: керування клієнтами та оформлення відправлень/посилок.
+2. **Fleet Service (`Services/Fleet/Fleet.Api`)**:
+   - Технологічний стек: **Entity Framework Core (Code-First)**, база даних **SQL Server (`FleetDb`)**.
+   - Домен: автопарк, склади, ліцензії, кур'єри, зони обслуговування та маршрути.
+3. **Reviews Service (`Services/Reviews/Reviews.WebApi`)**:
+   - Технологічний стек: **Clean Architecture + CQRS (MediatR)**, документоорієнтована база даних **MongoDB (`trackingdb`)**.
+   - Домен: відгуки клієнтів, оцінки якості доставки, обговорення та інциденти.
+4. **API Gateway (`Platform.ApiGateway`)**:
+   - Зворотний проксі-сервер на базі **YARP (Yet Another Reverse Proxy)**.
+   - Забезпечує єдину точку входу (фіксований порт **5000**), резолвінг імен через Aspire Service Discovery, пріоритетну маршрутизацію та логування запитів.
+5. **Aggregator (`Platform.Aggregator`)**:
+   - Сервіс композитного агрегування даних.
+   - Виконує паралельні виклики (`Task.WhenAll`) через типізовані `HttpClient`, обробляє часткові відмови та повертає композитний DTO `ShipmentOverviewDto`.
+6. **Service Defaults (`Platform.ServiceDefaults`)**:
+   - Спільна конфігурація для всіх сервісів: Serilog зі збагаченням та виводом у `CompactJsonFormatter`, наскрізний `X-Correlation-Id` (Middleware + DelegatingHandler), OpenTelemetry (HTTP, SQL, MongoDB, власні Spans) та Health Checks.
+
+---
+
+### 2. Архітектура та взаємодія компонентів
+
+```mermaid
+flowchart TD
+    Client["Клієнт / Браузер"] -->|HTTP / :5000| Gateway["Platform.ApiGateway (YARP)"]
+    
+    subgraph Platform Orchestration [Aspire AppHost]
+        Gateway -->|"/api/deliveries/{id}/overview (Order: 1)"| Aggregator["Platform.Aggregator"]
+        Gateway -->|"/api/shipping/*, /api/shipments/*"| Shipping["Shipping.Api (ADO.NET / Dapper)"]
+        Gateway -->|"/api/fleet/*, /api/couriers/*"| Fleet["Fleet.Api (EF Core)"]
+        Gateway -->|"/api/reviews/*"| Reviews["Reviews.WebApi (CQRS / MongoDB)"]
+        
+        Aggregator -.->|"Task.WhenAll (ShippingClient)"| Shipping
+        Aggregator -.->|"Task.WhenAll (FleetClient)"| Fleet
+        Aggregator -.->|"Task.WhenAll (ReviewsClient)"| Reviews
+    end
+
+    subgraph Data Stores [Docker Containers WithDataVolume]
+        Shipping --> ShippingDb[("SQL Server: ShippingDb")]
+        Fleet --> FleetDb[("SQL Server: FleetDb")]
+        Reviews --> MongoDb[("MongoDB: trackingdb")]
+    end
+```
+
+---
+
+### 3. Необхідні інструменти та версії SDK
+
+- **.NET SDK:** 8.0 або 10.0 (проєкти націлені на `net8.0`).
+- **.NET Aspire:** 9.0.0.
+- **Docker Desktop / Podman:** для запуску контейнерів SQL Server і MongoDB.
+- **YARP Reverse Proxy:** 2.2.0.
+
+---
+
+### 4. Запуск платформи через Aspire AppHost
+
+#### 4.1. Налаштування секретів конфігурації
+Пароль до контейнера SQL Server не зашитий у коді, а безпечно передається через параметри Aspire:
+```bash
+dotnet user-secrets set "Parameters:sql-password" "Your_Strong_Password123!" --project Platform.AppHost
+```
+
+#### 4.2. Запуск всієї платформи однією командою:
+```bash
+dotnet run --project Platform.AppHost
+```
+Після запуску відкриється веб-панель **Aspire Dashboard**, де відображаються стан усіх сервісів, метрики, структуровані логи та розподілені траси OpenTelemetry.
+
+---
+
+### 5. Постійне сховище (Persistent Storage) контейнерів
+
+У [AppHost.cs](file:///D:/Programming/.net-labs/Platform.AppHost/AppHost.cs) для SQL Server та MongoDB налаштовано постійне сховище за допомогою `.WithDataVolume()`:
+- SQL Server: `builder.AddSqlServer("sql", password).WithDataVolume()`
+  - Бази даних: `ShippingDb`, `FleetDb`.
+- MongoDB: `builder.AddMongoDB("mongodb").WithDataVolume()`
+  - База даних: `trackingdb`.
+
+Завдяки `WithDataVolume()` дані зберігаються між перезапусками контейнерів.
+
+Порядок старту гарантується викликами `WaitFor`:
+`Databases -> Microservices -> Aggregator -> Gateway`.
+
+---
+
+### 6. Адресація API Gateway та маршрутизація
+
+- **Фіксований порт Gateway:** `http://localhost:5000`
+- **Пріоритети маршрутів (Order):**
+  - `Order: 1`: `/api/deliveries/{**catch-all}` -> `http://aggregator`
+  - `Order: 10..12`: `/api/shipping/{**catch-all}`, `/api/shipments/{**catch-all}`, `/api/customers/{**catch-all}` -> `http://shipping-api`
+  - `Order: 20..25`: `/api/fleet/{**catch-all}`, `/api/couriers/{**catch-all}`, `/api/routes/{**catch-all}`, `/api/vehicles/{**catch-all}`, `/api/warehouses/{**catch-all}`, `/api/zones/{**catch-all}` -> `http://fleet-api`
+  - `Order: 30`: `/api/reviews/{**catch-all}` -> `http://reviews-webapi`
+
+---
+
+### 7. Приклади HTTP-запитів (через Gateway на порту 5000)
+
+#### 7.1. Запит до Shipping.Api:
+```bash
+# Отримання інформації про відправлення
+curl -i http://localhost:5000/api/shipments/1
+
+# Через префікс домену
+curl -i http://localhost:5000/api/shipping/shipments/1
+```
+
+#### 7.2. Запит до Fleet.Api:
+```bash
+# Отримання інформації про кур'єра
+curl -i http://localhost:5000/api/couriers/1
+
+# Через префікс домену
+curl -i http://localhost:5000/api/fleet/couriers/1
+```
+
+#### 7.3. Запит до Reviews.WebApi:
+```bash
+# Отримання списку відгуків з фільтром за відправленням
+curl -i "http://localhost:5000/api/reviews?shipmentId=1"
+```
+
+#### 7.4. Запит до Aggregator (Композитний ендпоінт):
+```bash
+# Огляд доставки (об'єднує Shipping + Fleet + Reviews)
+curl -i "http://localhost:5000/api/deliveries/1/overview?courierId=1"
+
+# З передачею власного Correlation ID для наскрізного трасування
+curl -i -H "X-Correlation-Id: custom-trace-guid-12345" "http://localhost:5000/api/deliveries/1/overview"
+```
+
+---
+
+### 8. Наскрізний `X-Correlation-Id`, структуроване логування та OpenTelemetry
+
+1. **CorrelationId Middleware (`Platform.ServiceDefaults/Correlation/CorrelationIdMiddleware.cs`):**
+   - Перевіряє наявність заголовка `X-Correlation-Id` у вхідному запиті. Якщо він відсутній — генерує новий `Guid`.
+   - Записує значення в `LogContext.PushProperty("CorrelationId", ...)` та в заголовок HTTP-відповіді.
+2. **CorrelationId DelegatingHandler (`Platform.ServiceDefaults/Correlation/CorrelationIdDelegatingHandler.cs`):**
+   - Автоматично додає заголовок `X-Correlation-Id` до кожного вихідного виклику типізованих HTTP-клієнтів (`ShippingClient`, `FleetClient`, `ReviewsClient`).
+   - Забезпечує наскрізну кореляцію за ланцюжком: `Gateway -> Aggregator -> Мікросервіс`.
+3. **Serilog:**
+   - Збагачується властивостями: `ServiceName`, `Environment`, `MachineName`, `ThreadId`, `FromLogContext`.
+   - Форматування логів: `CompactJsonFormatter`.
+   - `writeToProviders: true`: автоматично передає логи до OpenTelemetry.
+4. **OpenTelemetry та власні Spans:**
+   - Автоматична інструментація: ASP.NET Core, HttpClient, SqlClient, MongoDB Commands.
+   - Власний `ActivitySource`: `Platform.Diagnostics`.
+   - Ключові бізнес-операції створюють Spans: `Shipping.CreateShipment`, `Shipping.ConfirmShipment`, `Fleet.PlanRoute`, `Reviews.CreateReview`.
+   - Експорт через OTLP за допомогою `.UseOtlpExporter()`.
+
+---
+
+### 9. Часткові відмови в Aggregator (Partial Failures)
+
+Якщо один із мікросервісів недоступний або повертає помилку:
+- Aggregator **НЕ** повертає HTTP 500.
+- Aggregator повертає **HTTP 200 OK** з доступними частинами даних та заповненим масивом `warnings`.
+- Приклад відповіді при недоступності сервісу відгуків:
+```json
+{
+  "shipmentId": 1,
+  "status": "Created",
+  "shipment": {
+    "id": 1,
+    "customerId": 1,
+    "status": "Created",
+    "recipientName": "Іван Коваленко",
+    "weightKg": 4.5
+  },
+  "courier": {
+    "id": 1,
+    "fullName": "Андрій Мельник",
+    "status": "Active"
+  },
+  "warnings": [
+    "Reviews service returned status 503 (Service Unavailable) for shipment 1"
+  ]
+}
+```
+
+---
+
+### 10. Типові проблеми та діагностика
+
+1. **Помилка `Docker is not running`:**
+   - Переконайтеся, що Docker Desktop запущено перед виконанням `dotnet run --project Platform.AppHost`.
+2. **Конфлікт порту 5000:**
+   - Перевірте, чи порт 5000 не зайнятий іншою програмою (`netstat -ano | findstr :5000`).
+3. **Не вдається з'єднатися з базою даних у тестах або автономному режимі:**
+   - При запуску поза Aspire перевірте наявність локальних рядків підключення у відповідних `appsettings.json`.
+4. **Перевірка трасування OpenTelemetry:**
+   - Відкрийте веб-панель Aspire Dashboard (посилання виводиться в консолі при старті `Platform.AppHost`).
+   - Перейдіть у розділ **Traces** або **Structured Logs**, знайдіть свій `X-Correlation-Id` та перегляньте детальний ланцюжок спанів між усіма компонентами платформи.
