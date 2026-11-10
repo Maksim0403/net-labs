@@ -20,6 +20,11 @@ public class Courier : AuditableEntity
         WarehouseId = warehouseId; FullName = fullName; Phone = phone;
     }
     public void AssignLicense(CourierLicense license) => License = license;
+    public void Update(string fullName, string phone)
+    {
+        if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(phone)) throw new DomainException("Courier fields are required");
+        FullName = fullName; Phone = phone;
+    }
     public void AssignToZone(DeliveryZone zone)
     {
         if (CourierZones.Any(x => x.ZoneId == zone.Id)) throw new DomainException("Courier is already assigned to this zone");

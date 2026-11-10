@@ -13,6 +13,12 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.0.0" />
+		<PackageReference Include="Grpc.AspNetCore" Version="2.66.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<Protobuf Include="Protos\fleet.proto" GrpcServices="Server" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\Platform.ServiceDefaults\Platform.ServiceDefaults.csproj" />

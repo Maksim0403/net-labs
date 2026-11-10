@@ -19,7 +19,7 @@ public static class DbInitializer
             await db.Vehicles.AddAsync(vehicle, ct);
         }
 
-        if (!await db.Couriers.AnyAsync(c => c.Phone == "+380991112233", ct))
+        if (!await db.Couriers.AnyAsync(ct) && !await db.CourierLicenses.AnyAsync(l => l.Number == "AB123456", ct))
         {
             var courier = new Courier(warehouse.Id, "Андрій Мельник", "+380991112233");
             courier.AssignLicense(new CourierLicense("AB123456", "B", new DateOnly(2028, 1, 1)));

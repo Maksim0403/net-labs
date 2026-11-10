@@ -1,4 +1,6 @@
 using Fleet.Api.ErrorHandling;
+using Fleet.Api.Grpc;
+using Fleet.Bll.Caching;
 using Fleet.Bll.Mapping;
 using Fleet.Bll.Services;
 using Fleet.Bll.Validators;
@@ -12,6 +14,17 @@ using Platform.ServiceDefaults;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+// Redis через Aspire-інтеграцію для розподіленого кешування (Частина 3.1)
+builder.AddRedisDistributedCache("redis");
+
+// Локальне кешування з обмеженням розміру (Частина 2.1)
+builder.Services.AddMemoryCache(o => o.SizeLimit = 10_000);
+builder.Services.AddSingleton<CacheMetrics>();
+builder.Services.AddScoped<ITwoLevelCache, TwoLevelCache>();
+
+// gRPC-сервер з серверним interceptor для логування (Частина 4.3, 6.2)
+builder.Services.AddGrpc(o => o.Interceptors.Add<LoggingInterceptor>());
 
 var connectionString = builder.Configuration.GetConnectionString("FleetDb")
     ?? throw new InvalidOperationException("Connection string 'FleetDb' is missing");
@@ -50,10 +63,18 @@ var app = builder.Build();
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<FleetDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     await db.Database.MigrateAsync();
     if (!app.Environment.IsProduction())
     {
-        await DbInitializer.SeedAsync(db);
+        try
+        {
+            await DbInitializer.SeedAsync(db);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Помилка при ініціалізації або сідінгу FleetDb.");
+        }
     }
 }
 
@@ -68,6 +89,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
+app.MapGrpcService<FleetGrpcService>();
 
 app.Run();
 

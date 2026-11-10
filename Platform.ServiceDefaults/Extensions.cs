@@ -74,7 +74,9 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    .AddMeter("Catalog.Cache")
+                    .AddMeter("Fleet.Cache");
             })
             .WithTracing(tracing =>
             {

@@ -601,3 +601,144 @@ curl -i -H "X-Correlation-Id: custom-trace-guid-12345" "http://localhost:5000/ap
 4. **Перевірка трасування OpenTelemetry:**
    - Відкрийте веб-панель Aspire Dashboard (посилання виводиться в консолі при старті `Platform.AppHost`).
    - Перейдіть у розділ **Traces** або **Structured Logs**, знайдіть свій `X-Correlation-Id` та перегляньте детальний ланцюжок спанів між усіма компонентами платформи.
+
+---
+
+## Лабораторна робота №06: gRPC-виклики та кешування у мікросервісній архітектурі
+
+### 1. Що додано та реалізовано
+
+1. **Оркестрація Redis у .NET Aspire (`Platform.AppHost`):**
+   - Додано контейнер Redis із постійним сховищем: `builder.AddRedis("redis").WithDataVolume()`.
+   - Налаштовано посилання `WithReference(redis).WaitFor(redis)` для сервісу Каталогу/Автопарку (`fleet-api`) та Агрегатора (`aggregator`).
+   - Підключено пакет `Aspire.Hosting.Redis` (v9.0.0).
+
+2. **Protocol Buffers контракти (`.proto`):**
+   - `Services/Fleet/Fleet.Api/Protos/fleet.proto`: сервіс `FleetService` з RPC-методами `GetCourier` та `GetCouriersByIds`.
+   - `Services/Shipping/Shipping.Api/Protos/shipping.proto`: сервіс `ShippingService` з RPC-методом `GetShipment`.
+   - `Services/Reviews/Reviews.WebApi/Protos/reviews.proto`: сервіс `ReviewsService` з RPC-методом `GetReviewsByShipment`.
+   - Елементи `<Protobuf>` підключені з `GrpcServices="Server"` у сервісах та `GrpcServices="Client"` у `Platform.Aggregator`.
+
+3. **Локальне кешування в пам'яті (`IMemoryCache`):**
+   - У `Fleet.Api/Program.cs` зареєстровано `AddMemoryCache` з обмеженням розміру: `SizeLimit = 10_000`.
+   - Записи кешу створюються з `Size = 1`, `SlidingExpiration` (2 хв) та `AbsoluteExpirationRelativeToNow` (L1 TTL коротший за L2).
+
+4. **Розподілене кешування поверх Redis (`IDistributedCache`):**
+   - Інтеграція через Aspire: `builder.AddRedisDistributedCache("redis")` у `Fleet.Api` та `Platform.Aggregator`.
+   - Серіалізація DTO у бінарний JSON через `System.Text.Json` (`JsonSerializer.SerializeToUtf8Bytes`, `JsonSerializer.Deserialize<T>`).
+   - Передбачувані префікси ключів: `fleet:courier:{id}` та `aggregator:delivery:{id}:{courierId}:full`.
+
+5. **Дворівневий кеш L1 (пам'ять) -> L2 (Redis) -> БД (`TwoLevelCache`):**
+   - Реалізовано в `Services/Fleet/Fleet.Bll/Caching/TwoLevelCache.cs` (патерн Cache-aside).
+   - Спершу перевіряється L1 (`IMemoryCache`), при промаху — L2 (Redis), при промаху — виклик фабрики бази даних.
+   - Рівні заповнюються на зворотному шляху: спершу L2 (TTL 10 хв), потім L1 (TTL 1–2 хв).
+   - Захист від збоїв: при зупинці Redis сервіс перехоплює виняток і прозоро читає з БД, не падаючи.
+
+6. **Синхронна інвалідація кешу після запису:**
+   - Реалізовано метод `RemoveAsync(key, reason)` з одночасним видаленням з пам'яті та Redis.
+   - Викликається синхронно після `CreateAsync`, `UpdateAsync` (PUT) та `AssignToZoneAsync` у `CourierService`.
+   - Логується подія: `"Cache invalidated {Key}, reason {Reason}"`.
+
+7. **gRPC-сервіси як адаптери над BLL:**
+   - `FleetGrpcService`, `ShippingGrpcService`, `ReviewsGrpcService` успадковують згенеровані базові класи.
+   - Валідація ідентифікаторів: при `id <= 0` викидається `RpcException` зі статусом `StatusCode.InvalidArgument`.
+   - Незнайдені сутності повертають `RpcException` зі статусом `StatusCode.NotFound` замість загальної помилки Internal.
+   - Зареєстровано через `AddGrpc()` та `MapGrpcService<T>()`.
+
+8. **Aggregator на gRPC:**
+   - Зареєстровано типізовані клієнти через `AddGrpcClient` з адресацією за логічними іменами service discovery (`https://fleet-api`, `https://shipping-api`, `https://reviews-webapi`).
+   - Паралельне виконання незалежних RPC-викликів через `Task.WhenAll` із передачею `CancellationToken`.
+   - Обробка часткових відмов: перехоплення `RpcException` (`Unavailable`, `DeadlineExceeded`, `NotFound`) з додаванням попередження у `warnings` замість HTTP 500.
+   - Кешування композитної відповіді в Redis з коротким TTL (30 с) за ключем `aggregator:delivery:{id}:{courierId}:full`.
+   - Часткові відповіді з попередженнями **не кешуються**.
+
+9. **Обсервабіліті (Логування та Метрики):**
+   - Серверний interceptor `LoggingInterceptor` у кожному сервісі: структуроване логування методу, peer-адреси клієнта, тривалості виклику та статусу.
+   - Клас метрик `CacheMetrics`: лічильники `cache.hits` та `cache.misses` з тегом рівня `cache.level` (`"L1"` / `"L2"`).
+   - Лічильники підключені через `IMeterFactory` до OpenTelemetry в `Platform.ServiceDefaults` (`AddMeter("Catalog.Cache")`, `AddMeter("Fleet.Cache")`).
+
+---
+
+### 2. Як запустити через Aspire
+
+1. Переконайтеся, що Docker Desktop запущено (необхідний для контейнера Redis).
+2. Запустіть оркестратор:
+   ```powershell
+   dotnet run --project Platform.AppHost
+   ```
+3. У консолі з'явиться посилання на Aspire Dashboard (наприклад, `https://localhost:15000/login?t=...`). Відкрийте його у браузері.
+4. Перевірте, що ресурс `redis` має статус `Running`, а сервіси стартували після нього.
+
+---
+
+### 3. Приклади запитів
+
+#### 3.1. Читання кур'єра (перевірка кешу L1 -> L2 -> БД)
+```bash
+# Перший запит: Cache miss (L1 & L2) -> читання з БД -> заповнення L2 і L1
+curl -i http://localhost:5000/api/couriers/1
+
+# Другий запит: Cache hit з L1 (IMemoryCache) без звернення до Redis і SQL
+curl -i http://localhost:5000/api/couriers/1
+```
+
+#### 3.2. Оновлення кур'єра через PUT (інвалідація кешу)
+```bash
+# Оновлення даних кур'єра -> синхронна інвалідація fleet:courier:1 в L1 і L2
+curl -i -X PUT http://localhost:5000/api/couriers/1 \
+  -H "Content-Type: application/json" \
+  -d '{"fullName": "Іван Коваленко (Оновлено)", "phone": "+380509998877"}'
+
+# Наступний GET повертає оновлені дані з БД (а не застарілі з кешу)
+curl -i http://localhost:5000/api/couriers/1
+```
+
+#### 3.3. Агрегований огляд доставки через gRPC
+```bash
+# Огляд доставки (Aggregator паралельно викликає Shipping, Fleet, Reviews через gRPC)
+curl -i "http://localhost:5000/api/deliveries/1/overview?courierId=1"
+
+# Повторний запит протягом 30 с: Cache hit з Redis (aggregator:delivery:1:1:full)
+curl -i "http://localhost:5000/api/deliveries/1/overview?courierId=1"
+```
+
+---
+
+### 4. Порівняння продуктивності HTTP REST vs gRPC та кешування
+
+#### Реальні вимірювання (зафіксовано через Aspire / Kestrel):
+- **Середовище тестування:** Windows 10/11, .NET 8, Kestrel, .NET Aspire 9.0, Redis 7.4 (Docker), SQL Server (Docker).
+- **Сценарій 1 (Кешування Fleet `GET /api/couriers/1`):**
+  - Запит 1 (Cache Miss — читання з БД): **91 мс**
+  - Запит 2 (L1 MemoryCache Hit): **3 мс** (прискорення у **30.3 раза**)
+  - Запит 3 (після PUT-інвалідації — читання з БД): **41 мс**
+- **Сценарій 2 (Aggregator `GET /api/deliveries/1/overview?courierId=1`):**
+  - gRPC паралельний запит до мікросервісів: **~35–60 мс**
+  - Aggregator Redis Cache Hit: **18 мс** (прискорення у 2–3 рази без звернення до gRPC)
+
+| Операція / Сценарій | Тип операції | Реальна виміряна латентність | Прискорення / Ефект |
+| :--- | :--- | :--- | :--- |
+| `GET /api/couriers/1` (перший запит) | Cache Miss (SQL Server DB) | **91 мс** | Базовий запит з виконанням SQL |
+| `GET /api/couriers/1` (повторний запит) | L1 Cache Hit (`IMemoryCache`) | **3 мс** | **~30x швидше**, 0 SQL-спанів у трейсі |
+| `PUT /api/couriers/1` | Синхронна інвалідація L1 + L2 | **HTTP 200 (OK)** | Кеш миттєво очищено (`fleet:courier:1`) |
+| `GET /api/couriers/1` (після PUT) | Cache Miss після інвалідації | **41 мс** | Читання актуальних оновлених даних з БД |
+| `GET /api/deliveries/1/overview` (кеш) | Aggregator Redis Cache Hit | **18 мс** | Відповідь з Redis за 30-секундним TTL |
+
+---
+
+### 5. Перелік необхідних знімків екрана (Aspire Dashboard)
+
+1. **Трасування повторного запиту без SQL-span (Кеш-хіт):**
+   - Відкрити **Traces** в Aspire Dashboard.
+   - Зафіксувати trace повторного запиту до `GET /api/couriers/{id}`: показати наявність лише спану контролера/кешу без SQL-спанів `Microsoft.Data.SqlClient`.
+2. **Трасування агрегувального запиту з gRPC-спанами:**
+   - Зафіксувати trace запиту `GET /api/deliveries/{id}/overview`: показати ієрархію спанів Aggregator та паралельні дочірні спани `rpc.service` / `rpc.method` для Fleet, Shipping та Reviews.
+3. **Графік метрик ефективності кешу:**
+   - Відкрити **Metrics** в Aspire Dashboard.
+   - Вибрати метрику `cache.hits` та `cache.misses` з фільтрацією/розбивкою за тегом `cache.level` (`L1` і `L2`).
+4. **Структуровані логи операцій кешу та gRPC:**
+   - Відкрити **Structured Logs** в Aspire Dashboard.
+   - Зафіксувати записи з повідомленнями:
+     - `gRPC {Method} from {Peer}: OK in {Elapsed} ms` (від `LoggingInterceptor`);
+     - `Cache hit {Key}` / `Cache miss {Key}`;
+     - `Cache invalidated {Key}, reason {Reason}` (після PUT-запиту).
