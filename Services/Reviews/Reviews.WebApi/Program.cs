@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using MongoDB.Driver;
 using Platform.ServiceDefaults;
 using Reviews.Application;
 using Reviews.Infrastructure;
@@ -5,7 +7,9 @@ using Reviews.Infrastructure.Indices;
 using Reviews.Infrastructure.Seeding;
 using Reviews.WebApi.ErrorHandling;
 using Reviews.WebApi.Grpc;
+using Reviews.WebApi.HealthChecks;
 using Reviews.WebApi.Mapping;
+using Reviews.WebApi.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +17,22 @@ builder.AddServiceDefaults();
 
 // gRPC-сервер з серверним interceptor для логування (Частина 4.3, 6.2)
 builder.Services.AddGrpc(o => o.Interceptors.Add<LoggingInterceptor>());
+
+// Бізнес-метрики з лічильниками, гістограмами та gauge (Частина 2, Критерії 6, 7)
+builder.Services.AddSingleton<ReviewsMetrics>();
+
+// gRPC Health Checking Protocol (Частина 3.4, Критерій 10)
+builder.Services.AddGrpcHealthChecks();
+
+// Health check MongoDB (Частина 3.2, Критерій 8)
+builder.Services.AddHealthChecks()
+    .AddCheck<ReviewsHealthCheck>("reviews-check", tags: ["ready"])
+    .AddMongoDb(
+        sp => sp.GetRequiredService<IMongoClient>(),
+        name: "reviews-db",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: ["database", "mongodb", "ready"],
+        timeout: TimeSpan.FromSeconds(5));
 
 // Реєстрація шарів Clean Architecture
 builder.Services.AddApplication();
@@ -75,5 +95,6 @@ if (app.Environment.IsDevelopment() || true)
 
 app.MapControllers();
 app.MapGrpcService<ReviewsGrpcService>();
+app.MapGrpcHealthChecksService();
 
 app.Run();

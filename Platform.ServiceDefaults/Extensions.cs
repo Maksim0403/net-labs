@@ -76,7 +76,13 @@ public static class Extensions
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
                     .AddMeter("Catalog.Cache")
-                    .AddMeter("Fleet.Cache");
+                    .AddMeter("Fleet.Cache")
+                    .AddMeter("Orders.Api")
+                    .AddMeter("Shipping.Api")
+                    .AddMeter("Fleet.Api")
+                    .AddMeter("Catalog.Api")
+                    .AddMeter("Reviews.WebApi")
+                    .AddMeter("Polly");
             })
             .WithTracing(tracing =>
             {
@@ -119,7 +125,41 @@ public static class Extensions
             Predicate = r => r.Tags.Contains("live")
         });
 
+        // Розділені liveness і readiness endpoints (Частина 3.5, Критерій 11)
+        app.MapHealthChecks("/health/live", new HealthCheckOptions
+        {
+            Predicate = check => check.Tags.Contains("live")
+        });
+
+        app.MapHealthChecks("/health/ready", new HealthCheckOptions
+        {
+            Predicate = check => check.Tags.Contains("ready"),
+            ResponseWriter = WriteJsonResponse
+        });
+
         return app;
+    }
+
+    private static async Task WriteJsonResponse(Microsoft.AspNetCore.Http.HttpContext context, HealthReport report)
+    {
+        context.Response.ContentType = "application/json; charset=utf-8";
+        var result = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            status = report.Status.ToString(),
+            totalDuration = report.TotalDuration.TotalMilliseconds,
+            entries = report.Entries.ToDictionary(
+                e => e.Key,
+                e => new
+                {
+                    status = e.Value.Status.ToString(),
+                    description = e.Value.Description,
+                    duration = e.Value.Duration.TotalMilliseconds,
+                    error = e.Value.Exception?.Message,
+                    data = e.Value.Data,
+                    tags = e.Value.Tags
+                })
+        }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        await Microsoft.AspNetCore.Http.HttpResponseWritingExtensions.WriteAsync(context.Response, result);
     }
 }
 

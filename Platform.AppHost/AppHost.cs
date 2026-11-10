@@ -32,6 +32,7 @@ var shippingApi = builder.AddProject<Projects.Shipping_Api>("shipping-api")
     .WithReference(shippingDb)
     .WaitForCompletion(databaseInitializer)
     .WaitFor(sql)
+    .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints();
 
 var fleetApi = builder.AddProject<Projects.Fleet_Api>("fleet-api")
@@ -39,11 +40,13 @@ var fleetApi = builder.AddProject<Projects.Fleet_Api>("fleet-api")
     .WaitFor(sql)
     .WithReference(redis)
     .WaitFor(redis)
+    .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints();
 
 var reviewsWebApi = builder.AddProject<Projects.Reviews_WebApi>("reviews-webapi")
     .WithReference(trackingDb)
     .WaitFor(mongodb)
+    .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints();
 
 var aggregator = builder.AddProject<Projects.Platform_Aggregator>("aggregator")
@@ -55,6 +58,7 @@ var aggregator = builder.AddProject<Projects.Platform_Aggregator>("aggregator")
     .WaitFor(fleetApi)
     .WaitFor(reviewsWebApi)
     .WaitFor(redis)
+    .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints();
 
 var gateway = builder.AddProject<Projects.Platform_ApiGateway>("gateway")
@@ -63,6 +67,7 @@ var gateway = builder.AddProject<Projects.Platform_ApiGateway>("gateway")
     .WithReference(reviewsWebApi)
     .WithReference(aggregator)
     .WaitFor(aggregator)
+    .WithHttpHealthCheck("/health")
     .WithHttpEndpoint(port: 5000, name: "http")
     .WithExternalHttpEndpoints();
 

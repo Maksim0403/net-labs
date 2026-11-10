@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Shipping.Api.Metrics;
 using Shipping.Bll.Abstractions;
 using Shipping.Bll.Dto;
 
@@ -11,8 +12,13 @@ namespace Shipping.Api.Controllers;
 public class ShipmentsController : ControllerBase
 {
     private readonly IShipmentService _shipments;
+    private readonly ShippingMetrics _metrics;
 
-    public ShipmentsController(IShipmentService shipments) => _shipments = shipments;
+    public ShipmentsController(IShipmentService shipments, ShippingMetrics metrics)
+    {
+        _shipments = shipments;
+        _metrics = metrics;
+    }
 
     [HttpGet("{id:long}")]
     public async Task<ActionResult<ShipmentDto>> GetById(long id, CancellationToken ct)
@@ -32,6 +38,7 @@ public class ShipmentsController : ControllerBase
     public async Task<ActionResult<ShipmentDto>> Create(CreateShipmentDto input, CancellationToken ct)
     {
         var created = await _shipments.CreateAsync(input, ct);
+        _metrics.ShipmentCreated(created.Status ?? "Created");
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
@@ -39,8 +46,19 @@ public class ShipmentsController : ControllerBase
     [HttpPost("{id:long}/confirm")]
     public async Task<IActionResult> Confirm(long id, CancellationToken ct)
     {
-        await _shipments.ConfirmAsync(id, ct);
-        return NoContent();
+        // Вимірювання тривалості для успішних і невдалих сценаріїв (Частина 2.3, Критерій 7)
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        try
+        {
+            await _shipments.ConfirmAsync(id, ct);
+            _metrics.RecordDuration("confirm", success: true, sw.Elapsed.TotalMilliseconds);
+            return NoContent();
+        }
+        catch
+        {
+            _metrics.RecordDuration("confirm", success: false, sw.Elapsed.TotalMilliseconds);
+            throw;
+        }
     }
 
     [HttpPost("{id:long}/status")]

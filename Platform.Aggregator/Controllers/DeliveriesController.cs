@@ -53,8 +53,17 @@ public class DeliveriesController : ControllerBase
         var targetCourierId = courierId ?? 1;
         var cacheKey = $"aggregator:delivery:{id}:{targetCourierId}:full";
 
-        // Перевірка розподіленого кешу ДО паралельних gRPC-викликів
-        var cachedBytes = await _cache.GetAsync(cacheKey, ct);
+        // Перевірка розподіленого кешу ДО паралельних gRPC-викликів (Graceful degradation кешу Redis - Критерій 5)
+        byte[]? cachedBytes = null;
+        try
+        {
+            cachedBytes = await _cache.GetAsync(cacheKey, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Redis unavailable, falling back to database for {Key}", cacheKey);
+        }
+
         if (cachedBytes is not null)
         {
             _logger.LogInformation("Aggregator cache hit {Key}", cacheKey);
@@ -141,12 +150,19 @@ public class DeliveriesController : ControllerBase
         // Часткові відповіді не кешуємо
         if (overview.Warnings.Count == 0)
         {
-            await _cache.SetAsync(
-                cacheKey,
-                JsonSerializer.SerializeToUtf8Bytes(overview),
-                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30) },
-                ct);
-            _logger.LogInformation("Aggregated response cached in Redis {Key} (TTL 30s)", cacheKey);
+            try
+            {
+                await _cache.SetAsync(
+                    cacheKey,
+                    JsonSerializer.SerializeToUtf8Bytes(overview),
+                    new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30) },
+                    ct);
+                _logger.LogInformation("Aggregated response cached in Redis {Key} (TTL 30s)", cacheKey);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Redis unavailable, value for {Key} not cached", cacheKey);
+            }
         }
 
         return Ok(overview);

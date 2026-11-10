@@ -32,7 +32,7 @@ app.Use(async (context, next) =>
     finally
     {
         sw.Stop();
-        var proxyFeature = context.GetReverseProxyFeature();
+        var proxyFeature = context.Features.Get<IReverseProxyFeature>();
         var routeId = proxyFeature?.Route?.Config?.RouteId ?? context.GetEndpoint()?.DisplayName ?? "direct";
         var clusterId = proxyFeature?.Cluster?.Config?.ClusterId ?? "none";
         var statusCode = context.Response.StatusCode;
