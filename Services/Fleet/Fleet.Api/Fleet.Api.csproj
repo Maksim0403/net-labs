@@ -16,6 +16,9 @@
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
 		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.0.0" />
 		<PackageReference Include="Grpc.AspNetCore" Version="2.66.0" />
+		<PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.2" />
+		<PackageReference Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
+		<PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="2.66.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<Protobuf Include="Protos\fleet.proto" GrpcServices="Server" />
