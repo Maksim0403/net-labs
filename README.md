@@ -909,3 +909,128 @@ curl -i "http://localhost:5000/api/deliveries/1/overview?courierId=1"
 
 10. **Чому health check Redis повертає Degraded, а не Unhealthy?**
     - Кеш є необов'язковою оптимізаційною залежністю (graceful degradation). Якщо Redis недоступний, мікросервіс може продовжувати успішно обробляти бізнес-запити, звертаючись напряму до бази даних. Статус `Degraded` інформує адміністратора про погіршення продуктивності без виключення сервісу з балансування трафіку.
+
+
+---
+
+## Лабораторна робота №08. Асинхронна подієва мікросервісна архітектура з брокером повідомлень (RabbitMQ, .NET Aspire, OpenTelemetry, Outbox & Idempotency, DLQ)
+
+### 1. Огляд реалізованої архітектури
+
+У межах лабораторної роботи реалізовано подієву взаємодію між мікросервісами платформи з брокером повідомлень RabbitMQ через .NET Aspire:
+- **Брокер повідомлень**: RabbitMQ 3.13-management оркеструється в `Platform.AppHost` за допомогою `AddRabbitMQ("messaging").WithDataVolume().WithManagementPlugin()`. Підключення мікросервісів здійснюється за допомогою `Aspire.RabbitMQ.Client` 9.0.0 і офіційного асинхронного клієнта `RabbitMQ.Client` 7.x (`IChannel`).
+- **Спільна бібліотека `Platform.EventBus`**:
+  - Декларативне створення топології при старті (`TopologyInitializer` / `Topology.DeclareTopologyAsync`):
+    - Topic exchange: `catalog-events` (durable: true).
+    - Черги споживачів: `orders.catalog-sync` (bound `product.*`, `courier.*`) та `reviews.catalog-sync` (bound `product.renamed`, `courier.*`).
+    - Fanout Dead Letter Exchange (DLX): `catalog-events.dlx`.
+    - DLQ-черги: `orders.catalog-sync.dlq` та `reviews.catalog-sync.dlq`.
+    - Аргумент основних черг: `x-dead-letter-exchange = "catalog-events.dlx"`.
+  - **Незмінні інтеграційні події** (`IntegrationEvent`):
+    - `ProductPriceChangedEvent(int ProductId, string ProductName, decimal OldPrice, decimal NewPrice)`
+    - `ProductRenamedEvent(int ProductId, string OldName, string NewName)`
+    - `CourierUpdatedEvent(long CourierId, string FullName, string Phone, string Status)`
+    - `CourierAssignedEvent(long ShipmentId, long CourierId, DateTime AssignedAt)`
+    - Обов'язкові властивості: `EventId` (Guid, default `Guid.NewGuid()`), `OccurredAt` (DateTime, UTC), `CorrelationId` (string).
+  - **Публікатор (`RabbitMqEventPublisher : IEventPublisher`)**:
+    - Persistent публікація (`DeliveryMode.Persistent` / `Persistent = true`).
+    - Серіалізація System.Text.Json у camelCase (`JsonDefaults.Options`).
+    - Метадані: `ContentType = "application/json"`, `MessageId = EventId`, `Type = typeof(T).Name`, заголовок `x-correlation-id`.
+    - W3C Distributed Tracing Injection: `TracePropagation.Inject(props)` додає заголовок `traceparent`.
+  - **Базовий споживач (`RabbitMqConsumerBase : BackgroundService`)**:
+    - `BasicQosAsync(prefetchSize: 0, prefetchCount: 10, global: false)` — backpressure.
+    - `AsyncEventingBasicConsumer` з ручним асинхронним підтвердженням:
+      - Успішна обробка: `BasicAckAsync(ea.DeliveryTag, multiple: false)`.
+      - Постійні збої (`JsonException`, невалідне повідомлення): `BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false)` -> направлення в DLX/DLQ.
+      - Тимчасові збої: `RetryOrDeadLetterAsync` з підрахунком спроб у заголовку `x-retry-count` (максимум 3 спроби, після чого `BasicNackAsync(requeue: false)` у DLQ).
+    - Відновлення W3C-трасування: `TracePropagation.StartConsumerActivity(ea, queue)` створює `ActivityKind.Consumer` з тегами `messaging.system = "rabbitmq"`, `messaging.destination.name = queue`, `messaging.message.id = ea.BasicProperties.MessageId`.
+
+### 2. Відображення домену (Event Mapping)
+
+| Сервіс-джерело (Каталог / Власник) | Подія | Routing Key | Сервіс-споживач (Замовлення) | Сервіс-споживач (Відгуки) |
+|---|---|---|---|---|
+| **Fleet (Каталог)** | `ProductPriceChangedEvent` | `product.price-changed` | **Shipping (Orders)**: оновлює локальну копію `dbo.Products.Price` | - |
+| **Fleet (Каталог)** | `ProductRenamedEvent` | `product.renamed` | **Shipping (Orders)**: оновлює назву `dbo.Products.Name` | **Reviews**: оновлює денормалізоване поле `productName` у відгуках |
+| **Fleet (Кур'єри)** | `CourierUpdatedEvent` | `courier.updated` | **Shipping (Orders)**: оновлює знімок кур'єра в `dbo.Shipments` | **Reviews**: оновлює денормалізоване ім'я кур'єра `courierName` |
+
+### 3. Гарантії ідемпотентності та збереження стану
+
+1. **Гарантія публікації після збереження**:
+   - У `Fleet.Bll.Services.CatalogService` та `CourierService` події публікуються строго після `await uow.SaveChangesAsync(ct);`. Жодна подія не публікується до успішного завершення транзакції.
+2. **Ідемпотентність обробника (`Shipping.Api.IntegrationEvents.ProductPriceChangedHandler` та `CourierUpdatedHandler`)**:
+   - Таблиця `dbo.ProcessedEvents` (`EventId UNIQUEIDENTIFIER PRIMARY KEY, ProcessedAt DATETIME2`).
+   - Операція `TryAddAsync` виконує вставку `EventId` у межах транзакції Unit of Work (`BeginTransactionAsync`).
+   - Порушення Primary Key (помилки 2627 / 2601) сигналізує про дублікат — транзакція скасовується (`RollbackAsync`), подія пропускається, повторна обробка безпечно ігнорується без зміни даних.
+3. **Ідемпотентність у сервісі відгуків (`Reviews.WebApi.IntegrationEvents`)**:
+   - Колекція MongoDB `processed_events` з унікальним індексом на `_id` (`EventId`). Дублікати відловлюються через `MongoWriteException` (DuplicateKey) та ігноруються.
+
+---
+
+### 4. Відповіді на контрольні питання
+
+1. **Яка різниця між синхронними gRPC-викликами та асинхронною подієвою комунікацією? Коли доречний кожен варіант?**
+   - **Синхронний gRPC**: клієнт блокується (очікує відповіді) під час обробки запиту; висока зв'язність у часі (temporal coupling); збій сервера або мережі одразу призводить до помилки у клієнта. Доречний для запитів читання даних у реальному часі (query / read), перевірок валідації перед оформленням, або інтерактивних запитів, коли результат потрібен користувачеві негайно.
+   - **Асинхронна подієва комунікація (RabbitMQ)**: відправник публікує подію в брокер і відразу продовжує роботу, не знаючи про кількість та доступність споживачів; сервіси повністю розв'язані в часі та просторі. Доречна для реплікації денормалізованих копій даних (eventual consistency), оповіщень, запуску тривалих фонових бізнес-процесів, та сценаріїв з високим навантаженням.
+
+2. **Що таке eventual consistency? Як події узгоджують копії даних, визначені в політиці дублювання з Лаб. 01?**
+   - **Eventual consistency (узгодженість у кінцевому підсумку)** — модель узгодженості розподіленої системи, за якої за відсутності нових змін усі репліки/копії даних зрештою стають однаковими, хоча в окремий момент часу між ними може існувати невелика затримка.
+   - У політиці дублювання з Лаб. 01 сервіс-каталог (Fleet) є єдиним джерелом істини (source of truth) для товарів та кур'єрів. При їх зміні генеруються події (`ProductPriceChangedEvent`, `CourierUpdatedEvent`), які споживачі (Shipping, Reviews) вичитують зі своїх черг та оновлюють власні локальні read models (`dbo.Products`, `Reviews.CourierName`). При цьому оформлені замовлення зберігають історичний знімок на момент покупки.
+
+3. **Чому domain events мають бути незмінними і самодостатніми?**
+   - **Незмінність (`record` з `init`-властивостями)**: подія фіксує факт у минулому часі, який уже відбувся у бізнес-домені. Вона не може бути змінена брокером чи споживачами.
+   - **Самодостатність**: подія містить усі дані, необхідні споживачам для її повної обробки (ідентифікатори, назви, нові значення). Споживачеві не потрібно здійснювати зворотний синхронний HTTP/gRPC-запит до сервісу-джерела («callback antipattern»), що зберігає повну автономність та стійкість сервісів до збоїв.
+
+4. **Як працює publish-subscribe у RabbitMQ? Яка роль exchange, queue і binding?**
+   - **Exchange**: точка прийому повідомлень від видавця. Відповідає за маршрутизацію повідомлень до черг на основі типу exchange (Topic, Direct, Fanout, Headers) і ключів маршрутизації (routing key).
+   - **Queue**: буфер у пам'яті або на диску, який зберігає повідомлення для конкретного споживача, доки той їх не вичитає та не підтвердить (ack).
+   - **Binding**: зв'язок/правило між exchange та queue, що визначає шаблон routing key (наприклад, `product.*`, `courier.*`), за яким exchange копіює повідомлення до відповідної черги.
+   - У моделі Pub/Sub кожен незалежний сервіс-споживач має власну чергу, прив'язану до спільного exchange, і отримує власну незалежну копію кожного релевантного повідомлення.
+
+5. **Що таке ідемпотентність і чому вона обов’язкова для consumers?**
+   - **Ідемпотентність** — це властивість операції при багаторазовому виконанні з тими самими вхідними даними давати той самий кінцевий результат, що й при одноразовому виклику.
+   - Вона обов'язкова, оскільки RabbitMQ гарантує доставку повідомлень за семантикою **«at-least-once» (щонайменше один раз)**. Через розриви з'єднань після обробки, але до надсилання `BasicAckAsync`, перезапуски сервісу чи повторні спроби те саме повідомлення може бути доставлено повторно. Без ідемпотентності це призвело б до подвійних списань, повторного застосування змін чи пошкодження даних.
+
+6. **Як гарантувати, що подія буде опублікована лише після успішного збереження в БД і не загубиться? Що таке Transactional Outbox?**
+   - У базовому варіанті гарантія забезпечується викликом `await publisher.PublishAsync` строго **після** `await _context.SaveChangesAsync()` / коміту транзакції бази даних.
+   - Проте при падінні процесу після коміту БД, але до надсилання в брокер повідомлення може загубитися (Dual-Write Problem). Патерн **Transactional Outbox** вирішує це: подія зберігається в спеціальну таблицю `OutboxMessages` у тій самій транзакції бази даних, що й бізнес-сутність. Окремий фоновий процес (наприклад, через Quartz або CDC/Debezium) зчитує невідправлені події з БД, публікує їх у RabbitMQ і позначає як відправлені, гарантуючи надійну доставку.
+
+7. **Що таке Dead Letter Exchange і коли повідомлення потрапляє туди?**
+   - **Dead Letter Exchange (DLX)** — це exchange, куди RabbitMQ автоматично перенаправляє «мертві» повідомлення (повідомлення, які не вдалося успішно обробити).
+   - Повідомлення потрапляє в DLX у випадках:
+     1. Споживач відхилив повідомлення викликом `BasicNackAsync` або `BasicRejectAsync` з аргументом `requeue: false`.
+     2. Вичерпано час життя повідомлення (TTL - Time-To-Live).
+     3. Переповнено ліміт довжини черги (`x-max-length`).
+
+8. **Чому для підрахунку повторів повідомлення публікується заново, а не повертається в чергу через requeue?**
+   - Якщо повернути повідомлення в чергу через `BasicNackAsync(requeue: true)`, RabbitMQ повертає оригінальне повідомлення в чергу без жодних змін — його заголовки (Headers) модифікувати неможливо. Споживач не матиме змоги дізнатися номер поточної спроби і впаде в нескінченний цикл невдалих повторів («poison message loop»).
+   - Тому оригінал підтверджується (`BasicAckAsync`), а в exchange публікується нова копія зі збільшеним значенням лічильника `x-retry-count`.
+
+9. **Як контекст трасування передається через брокер повідомлень?**
+   - Використовується механізм **W3C Trace Context Propagation**:
+     - **При публікації**: `TextMapPropagator.Inject` витягує `TraceId` та `SpanId` з поточного `Activity.Current` і записує заголовок `traceparent` (і `tracestate`) у словник заголовків повідомлення `BasicProperties.Headers`.
+     - **При споживанні**: споживач через `TextMapPropagator.Extract` зчитує `traceparent` із заголовків отриманого повідомлення та створює новий `Activity` з `ActivityKind.Consumer`, вказуючи витягнутий контекст як батьківський.
+     - Це формує єдиний наскрізний розподілений trace в Aspire Dashboard: HTTP-запит → публікація в брокер → споживання черги → операції з БД.
+
+10. **Чим тимчасовий збій (retry) відрізняється від постійного (DLQ)?**
+    - **Тимчасовий збій (Transient Failure)**: короткочасна недоступність зовнішнього ресурсу (тимчасовий таймаут підключення до БД, завантаженість кешу, розрив мережі). При повторній спробі через певний час операція з високою ймовірністю буде успішною. Обробляється через механізм повторів (`x-retry-count`) до досягнення ліміту спроб.
+    - **Постійний збій (Permanent Failure)**: помилки валідації бізнес-правил, невалідна структура JSON-документа (`JsonException`), відсутність обов'язкових полів або несумісна версія контракту події. Такі помилки ніколи не зникнуть від повторних спроб і негайно відправляються в Dead Letter Queue (`BasicNackAsync(requeue: false)`) для подальшого ручного аналізу інженерами.
+
+---
+
+### 5. Таблиця самоперевірки за критеріями оцінювання
+
+| № | Критерій | Тип | Бали | Реалізація |
+|---|---|:---:|:---:|---|
+| 1 | RabbitMQ в AppHost з volume і Management UI | ШІ | 0.6 | `Platform.AppHost/AppHost.cs`: `builder.AddRabbitMQ("messaging").WithDataVolume().WithManagementPlugin()` з посиланнями через `.WithReference(rabbit).WaitFor(rabbit)`. |
+| 2 | Підключення через Aspire.RabbitMQ.Client (RabbitMQ.Client 7.x) | AST | 0.8 | `AddRabbitMQClient("messaging")` у `Fleet.Api`, `Shipping.Api`, `Reviews.WebApi`; пряме посилання на `RabbitMQ.Client` 7.1.1 та асинхронний `IChannel`. |
+| 3 | Декларативна топологія при старті: topic exchange, черги, bindings, DLX/DLQ | AST | 0.7 | `Platform.EventBus/Topology/Topology.cs`: `ExchangeDeclareAsync`, `QueueDeclareAsync` з `x-dead-letter-exchange`, `QueueBindAsync`; фоновий `TopologyInitializer : IHostedService`. |
+| 4 | Незмінні integration events з EventId і CorrelationId | AST | 0.7 | `Platform.EventBus/Events/IntegrationEvents.cs`: `IntegrationEvent` (Guid EventId, DateTime OccurredAt, CorrelationId), record-типи подій у минулому часі. |
+| 5 | IEventPublisher з persistent-публікацією в JSON | AST | 0.9 | `Platform.EventBus/RabbitMqEventPublisher.cs`: `Persistent = true`, `ContentType = "application/json"`, серіалізація через `System.Text.Json` camelCase. |
+| 6 | Події публікуються лише після успішного збереження змін | ШІ | 1.1 | `Fleet.Bll/Services/CatalogService.cs` та `CourierService.cs`: `await uow.SaveChangesAsync(ct)` і лише потім `await publisher.PublishAsync(...)`. |
+| 7 | Consumer як BackgroundService з ручним підтвердженням | AST | 1.0 | `Platform.EventBus/Consumers/RabbitMqConsumerBase.cs`, `Shipping.Api/IntegrationEvents/CatalogEventsConsumer.cs`, `Reviews.WebApi/IntegrationEvents/ReviewsCatalogEventsConsumer.cs`: `BasicQosAsync(0, 10)`, `AsyncEventingBasicConsumer`, ручний `BasicAckAsync`. |
+| 8 | Ack після успіху, Nack без requeue для постійних збоїв | ШІ | 0.8 | `BasicAckAsync` після обробки; `catch (JsonException)` викликає `BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false)` з направленням у DLX. |
+| 9 | Ідемпотентні обробники з таблицею оброблених подій | AST | 1.3 | Таблиця `dbo.ProcessedEvents` у SQL Server (`db/p1/schema.sql`, `Shipping.Dal/Migrations/`); `TryAddAsync` у транзакції з `RollbackAsync` при дублікаті. |
+| 10 | Реплікація копій даних за політикою дублювання з Лаб. 01 | ШІ | 1.3 | Оновлення `dbo.Products` і кур'єрів у `Shipping`, оновлення `productName` та `courierName` у `Reviews.WebApi` через `UpdateManyAsync`. |
+| 11 | Повтори з лічильником x-retry-count і максимумом спроб | ШІ | 0.9 | `RetryOrDeadLetterAsync`: зчитування `x-retry-count`, повторна публікація зі збільшеним значенням до 3 спроб, після чого `BasicNackAsync(requeue: false)` у DLQ. |
+| 12 | Передача контексту трасування через брокер | ШІ | 1.0 | `Platform.EventBus/Tracing/TracePropagation.cs`: `Inject` W3C `traceparent` при публікації; `Extract` та створення `ActivityKind.Consumer` з тегами `messaging.*`; `AddSource("Platform.Messaging")` у `Platform.ServiceDefaults`. |
+| 13 | Структуроване логування збоїв з бізнес-контекстом | ШІ | 0.4 | Логування в `CatalogEventsConsumer`, `ProductPriceChangedHandler`, `CourierService` містить `EventId`, `MessageId`, `CorrelationId`, назву черги та ідентифікатори сутностей. |

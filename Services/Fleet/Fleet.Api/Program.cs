@@ -1,6 +1,7 @@
 using Fleet.Api.ErrorHandling;
 using Fleet.Api.Grpc;
 using Fleet.Api.HealthChecks;
+using Fleet.Api.IntegrationEvents;
 using Fleet.Api.Metrics;
 using Fleet.Bll.Caching;
 using Fleet.Bll.Mapping;
@@ -12,6 +13,7 @@ using Fleet.Dal.Seeding;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Platform.EventBus;
 using Platform.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,11 @@ builder.AddServiceDefaults();
 
 // Redis через Aspire-інтеграцію для розподіленого кешування (Частина 3.1)
 builder.AddRedisDistributedCache("redis");
+
+// RabbitMQ через Aspire-інтеграцію (Лаб. 08, Частина 1.2, Критерій 2)
+builder.AddRabbitMQClient("messaging");
+builder.Services.AddEventBus();
+builder.Services.AddScoped<CatalogEventPublisher>();
 
 // Локальне кешування з обмеженням розміру (Частина 2.1)
 builder.Services.AddMemoryCache(o => o.SizeLimit = 10_000);
@@ -64,6 +71,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Сервіси BLL
 builder.Services.AddScoped<ICourierService, CourierService>();
+builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IWarehouseService, WarehouseService>();

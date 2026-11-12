@@ -12,6 +12,7 @@ public class FleetDbContext(DbContextOptions<FleetDbContext> options) : DbContex
     public DbSet<DeliveryZone> DeliveryZones => Set<DeliveryZone>();
     public DbSet<CourierZone> CourierZones => Set<CourierZone>();
     public DbSet<Route> Routes => Set<Route>();
+    public DbSet<ProcessedEvent> ProcessedEvents => Set<ProcessedEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) => modelBuilder.ApplyConfigurationsFromAssembly(typeof(FleetDbContext).Assembly);
 

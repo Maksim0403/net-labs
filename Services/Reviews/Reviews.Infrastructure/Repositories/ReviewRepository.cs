@@ -83,6 +83,26 @@ public sealed class ReviewRepository : MongoRepository<Review>, IReviewRepositor
         return await Collection.Find(filter).AnyAsync(ct);
     }
 
+    public async Task UpdateCourierNameAsync(long courierId, string newCourierName, CancellationToken ct = default)
+    {
+        var filter = Builders<Review>.Filter.Eq(r => r.CourierId, courierId);
+        var update = Builders<Review>.Update
+            .Set(r => r.CourierName, newCourierName)
+            .Set(r => r.UpdatedAt, DateTime.UtcNow);
+
+        await Collection.UpdateManyAsync(filter, update, cancellationToken: ct);
+    }
+
+    public async Task UpdateProductNameAsync(int productId, string newProductName, CancellationToken ct = default)
+    {
+        var filter = Builders<Review>.Filter.Eq(r => r.ProductId, productId);
+        var update = Builders<Review>.Update
+            .Set(r => r.ProductName, newProductName)
+            .Set(r => r.UpdatedAt, DateTime.UtcNow);
+
+        await Collection.UpdateManyAsync(filter, update, cancellationToken: ct);
+    }
+
     /// <summary>Читання списку із проєкцією в DTO.</summary>
     public async Task<IReadOnlyList<ReviewDto>> GetProjectedListAsync(
         FilterDefinition<Review> filter,

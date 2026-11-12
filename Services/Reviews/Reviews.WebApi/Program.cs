@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MongoDB.Driver;
+using Platform.EventBus;
 using Platform.ServiceDefaults;
 using Reviews.Application;
 using Reviews.Infrastructure;
@@ -8,12 +9,22 @@ using Reviews.Infrastructure.Seeding;
 using Reviews.WebApi.ErrorHandling;
 using Reviews.WebApi.Grpc;
 using Reviews.WebApi.HealthChecks;
+using Reviews.WebApi.IntegrationEvents;
 using Reviews.WebApi.Mapping;
 using Reviews.WebApi.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+// Підключення до брокера повідомлень RabbitMQ (Лабораторна 08)
+builder.AddRabbitMQClient("messaging");
+builder.Services.AddEventBus();
+
+// Реєстрація обробників подій та фонового споживача (Consumer)
+builder.Services.AddScoped<CourierUpdatedHandler>();
+builder.Services.AddScoped<ProductRenamedHandler>();
+builder.Services.AddHostedService<ReviewsCatalogEventsConsumer>();
 
 // gRPC-сервер з серверним interceptor для логування (Частина 4.3, 6.2)
 builder.Services.AddGrpc(o => o.Interceptors.Add<LoggingInterceptor>());
