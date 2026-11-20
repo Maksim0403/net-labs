@@ -95,6 +95,7 @@ public static class Extensions
                     })
                     .AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources")
                     .AddSource("MongoDB.Driver")
+                    .AddSource("Platform.Messaging")
                     .AddSource(PlatformDiagnostics.ActivitySourceName);
             });
 

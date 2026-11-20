@@ -180,5 +180,15 @@ public sealed class ShipmentRepository : BaseDapperRepository<Shipment>, IShipme
             throw SqlExceptionTranslator.Translate(ex);
         }
     }
+
+    public async Task UpdateCourierSnapshotAsync(long courierId, string fullName, string phone, CancellationToken ct = default)
+    {
+        await EnsureOpenAsync(ct);
+        const string sql = @"
+            UPDATE dbo.Shipments 
+            SET AssignedCourierName = @FullName, AssignedCourierPhone = @Phone, UpdatedAt = SYSUTCDATETIME()
+            WHERE AssignedCourierId = @CourierId;";
+        await Connection.ExecuteAsync(new CommandDefinition(sql, new { CourierId = courierId, FullName = fullName, Phone = phone }, Transaction, cancellationToken: ct));
+    }
 }
 

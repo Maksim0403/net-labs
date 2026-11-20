@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Platform.EventBus;
 using Platform.ServiceDefaults;
 using Shipping.Api.ErrorHandling;
 using Shipping.Api.Grpc;
 using Shipping.Api.HealthChecks;
+using Shipping.Api.IntegrationEvents;
 using Shipping.Api.Metrics;
 using Shipping.Bll.Abstractions;
 using Shipping.Bll.Mapping;
@@ -13,6 +15,16 @@ using Shipping.Dal.Abstractions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+// Підключення до брокера повідомлень RabbitMQ (Лабораторна 08)
+builder.AddRabbitMQClient("messaging");
+builder.Services.AddEventBus();
+
+// Реєстрація обробників подій та фонового споживача (Consumer)
+builder.Services.AddScoped<ProductPriceChangedHandler>();
+builder.Services.AddScoped<ProductRenamedHandler>();
+builder.Services.AddScoped<CourierUpdatedHandler>();
+builder.Services.AddHostedService<CatalogEventsConsumer>();
 
 // gRPC-сервер з серверним interceptor для логування (Частина 4.3, 6.2)
 builder.Services.AddGrpc(o => o.Interceptors.Add<LoggingInterceptor>());

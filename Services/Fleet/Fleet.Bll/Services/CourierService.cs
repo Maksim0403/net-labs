@@ -5,6 +5,8 @@ using Fleet.Bll.Specifications;
 using Fleet.Dal;
 using Fleet.Domain.Entities;
 using Fleet.Domain.Exceptions;
+using Platform.EventBus;
+using Platform.EventBus.Events;
 
 namespace Fleet.Bll.Services;
 
@@ -18,7 +20,12 @@ public interface ICourierService
     Task<IReadOnlyList<CourierDto>> GetAssignedToZoneSinceAsync(string zoneName, DateTime since, CancellationToken ct = default);
 }
 
-public sealed class CourierService(IUnitOfWork uow, IMapper mapper, ITwoLevelCache cache) : ICourierService
+public sealed class CourierService(
+    IUnitOfWork uow,
+    IMapper mapper,
+    ITwoLevelCache cache,
+    IEventPublisher? publisher = null,
+    ICorrelationContext? correlation = null) : ICourierService
 {
     // Cache-aside: перевірка кешу -> БД при промаху -> запис у кеш
     public async Task<CourierDetailsDto> GetByIdAsync(long id, CancellationToken ct = default)
@@ -77,6 +84,19 @@ public sealed class CourierService(IUnitOfWork uow, IMapper mapper, ITwoLevelCac
 
         courier.Update(input.FullName.Trim(), input.Phone.Trim());
         await uow.SaveChangesAsync(ct);
+
+        // Публікація події про оновлення кур'єра для синхронізації копій даних (Лаб. 08, Критерії 6, 10)
+        if (publisher is not null)
+        {
+            await publisher.PublishAsync(
+                new CourierUpdatedEvent(courier.Id, courier.FullName, courier.Phone, "Active")
+                {
+                    CorrelationId = correlation?.Current
+                },
+                "catalog-events",
+                "courier.updated",
+                ct);
+        }
 
         // Інвалідація кешу одразу після запису
         await cache.RemoveAsync($"fleet:courier:{id}", "CourierUpdated", ct);

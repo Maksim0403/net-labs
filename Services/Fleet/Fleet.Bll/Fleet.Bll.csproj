@@ -4,6 +4,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>Fleet.Bll</RootNamespace>
+		<NoWarn>$(NoWarn);NU1608</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="16.2.0" />
@@ -11,8 +12,10 @@
 		<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+		<PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Fleet.Dal\Fleet.Dal.csproj" />
+		<ProjectReference Include="..\..\..\Platform.EventBus\Platform.EventBus.csproj" />
 	</ItemGroup>
 </Project>

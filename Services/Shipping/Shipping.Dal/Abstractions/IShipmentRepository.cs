@@ -18,4 +18,7 @@ public interface IShipmentRepository : IGenericRepository<Shipment>
 
     /// <summary>Скасування (dbo.usp_CancelShipment).</summary>
     Task CancelAsync(long shipmentId, string changedBy, CancellationToken ct = default);
+
+    /// <summary>Оновлення денормалізованого снепшоту кур'єра при отриманні події CourierUpdated (Лаб. 08, Критерій 10).</summary>
+    Task UpdateCourierSnapshotAsync(long courierId, string fullName, string phone, CancellationToken ct = default);
 }

@@ -166,6 +166,28 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_SSH_Shipment_ChangedAt
 GO
 
 -- ---------------------------------------------------------------------
+-- ProcessedEvents (Лаб. 08: таблиця для ідемпотентності споживачів подій)
+-- ---------------------------------------------------------------------
+IF OBJECT_ID('dbo.ProcessedEvents') IS NULL
+CREATE TABLE dbo.ProcessedEvents (
+    EventId     UNIQUEIDENTIFIER PRIMARY KEY,
+    ProcessedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+-- ---------------------------------------------------------------------
+-- Products (Лаб. 08: локальна репліка довідника товарів із Каталогу)
+-- ---------------------------------------------------------------------
+IF OBJECT_ID('dbo.Products') IS NULL
+CREATE TABLE dbo.Products (
+    ProductId   INT PRIMARY KEY,
+    Name        NVARCHAR(200) NOT NULL,
+    Price       DECIMAL(12,2) NOT NULL,
+    UpdatedAt   DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+-- ---------------------------------------------------------------------
 -- Права найменших привілеїв для застосунку
 -- ---------------------------------------------------------------------
 IF DATABASE_PRINCIPAL_ID('shipping_app') IS NULL

@@ -14,6 +14,8 @@ public sealed class Review : BaseEntity
     public long CustomerId { get; private set; }
     public long CourierId { get; private set; }
     public string CourierName { get; private set; } = string.Empty;
+    public int ProductId { get; private set; }
+    public string ProductName { get; private set; } = string.Empty;
     public string Type { get; private set; } = "rating";
     public Rating Rating { get; private set; } = null!;
     public string Text { get; private set; } = string.Empty;
@@ -85,4 +87,3 @@ public sealed class Review : BaseEntity
         SetUpdatedAt(DateTime.UtcNow);
     }
 }
-

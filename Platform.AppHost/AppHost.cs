@@ -23,6 +23,11 @@ var trackingDb = mongodb.AddDatabase("trackingdb", "trackingdb");
 // Redis для розподіленого кешування (Частина 1.2)
 var redis = builder.AddRedis("redis").WithDataVolume();
 
+// RabbitMQ для асинхронного обміну повідомленнями (Лаб. 08, Частина 1.1)
+var rabbit = builder.AddRabbitMQ("messaging")
+    .WithDataVolume()
+    .WithManagementPlugin();
+
 var databaseInitializer = builder
     .AddProject<Projects.Platform_DatabaseInitializer>("shipping-db-init")
     .WithReference(shippingDb)
@@ -32,6 +37,8 @@ var shippingApi = builder.AddProject<Projects.Shipping_Api>("shipping-api")
     .WithReference(shippingDb)
     .WaitForCompletion(databaseInitializer)
     .WaitFor(sql)
+    .WithReference(rabbit)
+    .WaitFor(rabbit)
     .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints();
 
@@ -40,12 +47,16 @@ var fleetApi = builder.AddProject<Projects.Fleet_Api>("fleet-api")
     .WaitFor(sql)
     .WithReference(redis)
     .WaitFor(redis)
+    .WithReference(rabbit)
+    .WaitFor(rabbit)
     .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints();
 
 var reviewsWebApi = builder.AddProject<Projects.Reviews_WebApi>("reviews-webapi")
     .WithReference(trackingDb)
     .WaitFor(mongodb)
+    .WithReference(rabbit)
+    .WaitFor(rabbit)
     .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints();
 

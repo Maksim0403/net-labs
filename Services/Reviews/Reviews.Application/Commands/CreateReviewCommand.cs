@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Platform.EventBus;
+using Platform.EventBus.Events;
 using Reviews.Application.Common;
 using Reviews.Application.DTOs;
 using Reviews.Domain.Entities;
@@ -25,11 +27,16 @@ public sealed class CreateReviewCommandHandler : IRequestHandler<CreateReviewCom
 {
     private static readonly ActivitySource ActivitySource = new("Platform.Diagnostics", "1.0.0");
     private readonly IReviewRepository _repository;
+    private readonly IEventPublisher? _publisher;
     private readonly ILogger<CreateReviewCommandHandler>? _logger;
 
-    public CreateReviewCommandHandler(IReviewRepository repository, ILogger<CreateReviewCommandHandler>? logger = null)
+    public CreateReviewCommandHandler(
+        IReviewRepository repository,
+        IEventPublisher? publisher = null,
+        ILogger<CreateReviewCommandHandler>? logger = null)
     {
         _repository = repository;
+        _publisher = publisher;
         _logger = logger;
     }
 
@@ -56,7 +63,18 @@ public sealed class CreateReviewCommandHandler : IRequestHandler<CreateReviewCom
             request.Text,
             criteria);
 
+        // 1) Збереження в базі даних
         await _repository.AddAsync(review, cancellationToken);
+
+        // 2) Публікація події лише після успішного збереження змін (Лаб. 08, Критерій 6)
+        if (_publisher is not null)
+        {
+            await _publisher.PublishAsync(
+                new ReviewCreatedEvent(review.Id.ToString(), review.ShipmentId, review.CustomerId, review.Rating.Value),
+                "catalog-events",
+                "review.created",
+                cancellationToken);
+        }
 
         activity?.SetTag("reviews.review_id", review.Id.ToString());
         _logger?.LogInformation("Review created successfully. ReviewId: {ReviewId}, ShipmentId: {ShipmentId}, CustomerId: {CustomerId}, Rating: {Rating}",

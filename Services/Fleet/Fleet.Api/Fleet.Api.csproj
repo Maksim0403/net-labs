@@ -5,6 +5,7 @@
 		<Nullable>enable</Nullable>
 		<RootNamespace>Fleet.Api</RootNamespace>
 		<UserSecretsId>fleet-api-secrets</UserSecretsId>
+		<NoWarn>$(NoWarn);NU1608</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
@@ -19,12 +20,15 @@
 		<PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.2" />
 		<PackageReference Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
 		<PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="2.66.0" />
+		<PackageReference Include="Aspire.RabbitMQ.Client.v7" Version="9.5.2" />
+		<PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<Protobuf Include="Protos\fleet.proto" GrpcServices="Server" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\Platform.ServiceDefaults\Platform.ServiceDefaults.csproj" />
+		<ProjectReference Include="..\..\..\Platform.EventBus\Platform.EventBus.csproj" />
 		<ProjectReference Include="..\Fleet.Bll\Fleet.Bll.csproj" />
 	</ItemGroup>
 </Project>

@@ -7,6 +7,7 @@
     <Project Path="Platform.ServiceDefaults/Platform.ServiceDefaults.csproj" />
     <Project Path="Platform.ApiGateway/Platform.ApiGateway.csproj" />
     <Project Path="Platform.Aggregator/Platform.Aggregator.csproj" />
+    <Project Path="Platform.EventBus/Platform.EventBus.csproj" />
   </Folder>
   <Folder Name="/Services/Shipping/">
     <Project Path="Services/Shipping/Shipping.Api/Shipping.Api.csproj" />

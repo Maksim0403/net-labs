@@ -18,11 +18,15 @@ public sealed class UnitOfWork : IUnitOfWork
         Customers = new CustomerRepository(_connection, () => _transaction);
         Shipments = new ShipmentRepository(_connection, () => _transaction);
         ServiceTypes = new ServiceTypeRepository(_connection, () => _transaction);
+        ProcessedEvents = new ProcessedEventRepository(_connection, () => _transaction);
+        Products = new ProductRepository(_connection, () => _transaction);
     }
 
     public ICustomerRepository Customers { get; }
     public IShipmentRepository Shipments { get; }
     public IServiceTypeRepository ServiceTypes { get; }
+    public IProcessedEventRepository ProcessedEvents { get; }
+    public IProductRepository Products { get; }
 
     public async Task BeginTransactionAsync(
         IsolationLevel level = IsolationLevel.ReadCommitted, CancellationToken ct = default)
@@ -56,4 +60,3 @@ public sealed class UnitOfWork : IUnitOfWork
         await _connection.DisposeAsync();
     }
 }
-
